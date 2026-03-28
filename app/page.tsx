@@ -14,7 +14,6 @@ export default function Home() {
     return () => document.removeEventListener("contextmenu", handleContextMenu);
   }, []);
 
-  // Pastikan file ini ada di folder /public/poster.jpg
   const photoUrl = "/poster.jpg"; 
 
   return (
@@ -30,7 +29,6 @@ export default function Home() {
           </div>
           
           <div className="hidden lg:flex items-center gap-8 text-white/90 font-black text-[10px] uppercase tracking-widest">
-            {/* Terhubung ke ID #paket */}
             <a href="#paket" className="hover:text-[#E6CEA0] transition">Paket Soal</a>
             <a href="#testimoni" className="hover:text-[#E6CEA0] transition">Testimoni</a>
             <a href="#keunggulan" className="hover:text-[#E6CEA0] transition">Keunggulan</a>
@@ -49,8 +47,6 @@ export default function Home() {
       {/* 3. HERO SECTION */}
       <section className="relative pt-40 pb-32 bg-[#5D4037] overflow-hidden text-center px-6">
         <div className="max-w-7xl mx-auto relative z-10">
-          
-          {/* FOTO OWNER */}
           <div className="relative inline-block mb-12 group">
             <div className="absolute -inset-4 bg-[#E6CEA0] rounded-[2.5rem] blur-xl opacity-20"></div>
             <img 
@@ -76,8 +72,6 @@ export default function Home() {
                 Coba Gratis Sekarang
               </button>
             </Link>
-            
-            {/* Tombol Terhubung ke ID #paket */}
             <a href="#paket" className="flex-1">
               <button className="w-full border-2 border-[#E6CEA0] text-[#E6CEA0] px-10 py-5 rounded-2xl font-black text-xs uppercase hover:bg-[#E6CEA0]/10 transition-all tracking-widest">
                 Lihat Paket Berbayar
@@ -85,8 +79,6 @@ export default function Home() {
             </a>
           </div>
         </div>
-
-        {/* Efek Gelombang Bawah */}
         <div className="absolute bottom-0 left-0 right-0 h-20 bg-[#FDFBF9]" style={{ clipPath: 'ellipse(60% 100% at 50% 100%)' }}></div>
       </section>
 
@@ -105,27 +97,51 @@ export default function Home() {
         ))}
       </section>
 
-      {/* 5. TESTIMONI SECTION */}
+      {/* 5. TESTIMONI SECTION (UPDATE: 3 TESTIMONI HORIZONTAL) */}
       <section id="testimoni" className="py-32 bg-[#E6CEA0]/10 border-y border-[#E6CEA0]/20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-20">
             <h2 className="text-sm font-black text-[#A67C52] uppercase tracking-[0.4em] mb-4">Success Story</h2>
             <h3 className="text-4xl font-black text-[#3E2723] uppercase">Apa Kata Alumni?</h3>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-[#E6CEA0]/30 relative">
-              <span className="text-6xl absolute top-6 right-8 text-[#E6CEA0]/20 font-black">“</span>
-              <p className="text-[#5D4037] italic text-sm leading-relaxed mb-8 relative z-10">
-                "Soal-soalnya mirip banget sama ujian aslinya! Berkat simulasi di sini, aku jadi nggak grogi pas hari H."
-              </p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[#5D4037] rounded-2xl flex items-center justify-center text-[#E6CEA0] font-black">A</div>
-                <div>
-                  <h4 className="font-black text-[#3E2723] text-sm uppercase">Andi Pratama</h4>
-                  <p className="text-[10px] font-bold text-[#A67C52] uppercase tracking-widest">Lolos CPNS 2025</p>
+          
+          {/* Container Testimoni Flexbox */}
+          <div className="flex flex-wrap justify-center gap-8">
+            {[
+              {
+                nama: "Surya Adi Pratama",
+                quote: "Paket include ini mah sama yang ngajarnya juga seru, sharing obrolan di grup",
+                avatar: "S"
+              },
+              {
+                nama: "Fahri Arvin",
+                quote: "Soalnya mirip asli, harga sangat terjangkau, ramah dikantong. Sangat bermanfaat!",
+                avatar: "F"
+              },
+              {
+                nama: "Fitra Maulana",
+                quote: "Soal-soalnya mirip banget sama ujian aslinya! Berkat simulasi di sini, aku jadi nggak grogi pas hari H.",
+                avatar: "F"
+              }
+            ].map((testi, i) => (
+              <div key={i} className="bg-white p-10 rounded-[2.5rem] shadow-lg border border-[#E6CEA0]/30 relative flex-1 min-w-[300px] max-w-[380px] transition-transform hover:scale-[1.02] flex flex-col">
+                <span className="text-6xl absolute top-6 right-8 text-[#E6CEA0]/20 font-black">“</span>
+                
+                <p className="text-[#5D4037] italic text-sm leading-relaxed mb-8 relative z-10 min-h-[80px]">
+                  "{testi.quote}"
+                </p>
+                
+                <div className="flex items-center gap-4 border-t border-[#E6CEA0]/20 pt-6 mt-auto">
+                  <div className="w-12 h-12 bg-[#5D4037] rounded-2xl flex items-center justify-center text-[#E6CEA0] font-black shadow-inner">
+                    {testi.avatar}
+                  </div>
+                  <div>
+                    <h4 className="font-black text-[#3E2723] text-sm uppercase">{testi.nama}</h4>
+                    <p className="text-[10px] font-bold text-[#A67C52] uppercase tracking-widest">Lolos CPNS 2025</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -137,7 +153,6 @@ export default function Home() {
           <h3 className="text-4xl font-black text-[#3E2723] mb-20 uppercase">Paket Belajar Pejuang</h3>
           
           <div className="flex justify-center">
-            {/* Paket Utama */}
             <div className="bg-[#5D4037] p-12 rounded-[4rem] shadow-2xl relative max-w-md w-full border-4 border-[#E6CEA0] transform hover:scale-[1.02] transition-all">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#E6CEA0] text-[#5D4037] px-8 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">REKOMENDASI</div>
               
@@ -145,18 +160,10 @@ export default function Home() {
               <div className="text-6xl font-black mb-10 text-[#E6CEA0] tracking-tighter">Rp 30k</div>
               
               <ul className="text-left space-y-5 mb-12 text-white/90 text-[11px] font-bold uppercase tracking-wide">
-                <li className="flex items-center gap-3">
-                  <span className="text-[#E6CEA0]">✔</span> 10x Try Out Full (TWK, TIU, TKP)
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-[#E6CEA0]">✔</span> Pembahasan Teks Lengkap
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-[#E6CEA0]">✔</span> Grafik Statistik Kelulusan
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-[#E6CEA0]">✔</span> Akses Selamanya
-                </li>
+                <li className="flex items-center gap-3"><span className="text-[#E6CEA0]">✔</span> 10x Try Out Full (TWK, TIU, TKP)</li>
+                <li className="flex items-center gap-3"><span className="text-[#E6CEA0]">✔</span> Pembahasan Teks Lengkap</li>
+                <li className="flex items-center gap-3"><span className="text-[#E6CEA0]">✔</span> Grup Belajar dan Sharing</li>
+                <li className="flex items-center gap-3"><span className="text-[#E6CEA0]">✔</span> Akses Selamanya</li>
               </ul>
               
               <Link href="/login">
