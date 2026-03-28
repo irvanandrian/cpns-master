@@ -18,7 +18,6 @@ function UjianContent() {
   const searchParams = useSearchParams();
   const paketDipilih = searchParams.get('paket') || "1";
   
-  // PERBAIKAN DI SINI: Berikan nilai awal undefined agar tidak error "got 0 arguments"
   const hitungSkorRef = useRef<() => void>(undefined);
 
   useEffect(() => {
@@ -48,7 +47,6 @@ function UjianContent() {
           poin = 5;
         }
       } else if (item.kategori === 'TKP') {
-        // Mengambil poin berdasarkan opsi (poin_a, poin_b, dst)
         const fieldPoin = `poin_${pilihanUser?.toLowerCase()}`;
         poin = parseInt(item[fieldPoin]) || 0;
         sTKP += poin;
@@ -60,7 +58,6 @@ function UjianContent() {
     setIsFinished(true);
   };
 
-  // Simpan fungsi ke ref agar bisa dipanggil saat timer habis
   hitungSkorRef.current = hitungSkor;
 
   useEffect(() => {
@@ -92,9 +89,12 @@ function UjianContent() {
             {dataReview.map((item, idx) => (
               <div key={idx} className="bg-white p-5 rounded-2xl border border-[#E6CEA0]/30 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#A67C52]"></div>
+                {item.image_url && (
+                  <img src={item.image_url} alt="soal" className="max-h-40 mx-auto mb-4 rounded-lg shadow-sm border" />
+                )}
                 <p className="font-bold text-sm mb-3">{idx + 1}. {item.pertanyaan}</p>
                 <div className="text-xs p-4 bg-[#FDFBF9] rounded-xl border border-[#E6CEA0]/20 text-[#5D4037] italic leading-relaxed">
-                  <b className="not-italic text-[#A67C52] block mb-1">PEMBAHASAN:</b> {item.pembahasan || "Belum ada pembahasan."}
+                  <b className="not-italic text-[#A67C52] block mb-1">PEMBAHASAN (Kunci: {item.kunci?.toUpperCase()}):</b> {item.pembahasan || "Belum ada pembahasan."}
                 </div>
               </div>
             ))}
@@ -131,8 +131,11 @@ function UjianContent() {
 
       <div className="max-w-6xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
-          <div className="bg-white p-8 rounded-[2.5rem] border border-[#E6CEA0]/20 shadow-sm mb-6 min-h-[150px] flex items-center">
-            <p className="text-sm md:text-base font-bold leading-relaxed">{s?.pertanyaan}</p>
+          <div className="bg-white p-8 rounded-[2.5rem] border border-[#E6CEA0]/20 shadow-sm mb-6 flex flex-col items-center gap-4">
+            {s?.image_url && (
+              <img src={s.image_url} alt="Figural" className="max-h-60 object-contain rounded-xl border-2 border-[#FDFBF9] shadow-sm" />
+            )}
+            <p className="text-sm md:text-base font-bold leading-relaxed text-left w-full">{s?.pertanyaan}</p>
           </div>
 
           <div className="space-y-3">
@@ -163,7 +166,7 @@ function UjianContent() {
         <div className="lg:col-span-1">
           <div className="bg-white p-6 rounded-[2.5rem] border border-[#E6CEA0]/20 shadow-sm sticky top-24">
             <p className="text-[9px] font-black text-[#A67C52] uppercase mb-4 text-center tracking-[0.3em]">Navigasi Soal</p>
-            <div className="grid grid-cols-5 gap-2 mb-6">
+            <div className="grid grid-cols-5 gap-2 mb-6 max-h-[40vh] overflow-y-auto pr-1">
               {soal.map((item, i) => (
                 <button
                   key={i}

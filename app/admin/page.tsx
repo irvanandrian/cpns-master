@@ -1,15 +1,15 @@
 "use client";
-import React, { useState, useEffect } from 'react'; // Tambah useEffect
+import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { supabase } from '../lib/supabase'; 
-import { useRouter } from 'next/navigation'; // Tambah import ini
+import { useRouter } from 'next/navigation';
 
 export default function AdminPage() {
   const [status, setStatus] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false); // State untuk cek admin
-  const router = useRouter(); // DEFINE ROUTER DI SINI
+  const [isAdmin, setIsAdmin] = useState(false);
+  const router = useRouter();
 
-  // PROTEKSI: Cek apakah yang buka halaman ini beneran Admin
+  // PROTEKSI: Cek Admin
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -69,6 +69,8 @@ export default function AdminPage() {
           poin_c: parseInt(s.poin_c) || 0,
           poin_d: parseInt(s.poin_d) || 0,
           poin_e: parseInt(s.poin_e) || 0,
+          // UPDATE: Tambahkan kolom image_url agar bisa dibaca dari Excel
+          image_url: s.image_url || null, 
         }));
 
         const { error } = await supabase.from('soal').insert(formatSoal);
@@ -77,7 +79,7 @@ export default function AdminPage() {
           console.error("Supabase Error:", error);
           setStatus("❌ Gagal Simpan: " + error.message);
         } else {
-          setStatus(`✅ Berhasil! ${formatSoal.length} soal & pembahasan terupload.`);
+          setStatus(`✅ Berhasil! ${formatSoal.length} soal terupload.`);
         }
       } catch (err) {
         console.error("Code Error:", err);
@@ -87,7 +89,6 @@ export default function AdminPage() {
     reader.readAsBinaryString(file);
   };
 
-  // Jangan tampilkan apa-apa selama ngecek status admin
   if (!isAdmin) return null;
 
   return (
@@ -100,7 +101,7 @@ export default function AdminPage() {
         </div>
         
         <h1 className="text-2xl font-black mb-2 text-center uppercase tracking-tighter">Gaskeun <span className="text-[#A67C52]">Admin</span></h1>
-        <p className="text-slate-400 text-[10px] text-center mb-8 font-bold uppercase tracking-widest">Upload Master Soal & Pembahasan (.xlsx)</p>
+        <p className="text-slate-400 text-[10px] text-center mb-8 font-bold uppercase tracking-widest">Upload Master Soal & Gambar (.xlsx)</p>
         
         <div className="relative border-4 border-dashed border-[#FDFBF9] rounded-[2rem] p-8 hover:border-[#E6CEA0] transition-all group bg-[#FDFBF9]/50 shadow-inner">
           <input 
@@ -124,17 +125,18 @@ export default function AdminPage() {
         )}
 
         <div className="mt-8 pt-6 border-t border-[#E6CEA0]/30">
-           <h4 className="text-[9px] font-black text-[#A67C52] uppercase tracking-[0.2em] mb-4 text-center italic">Wajib ada di Header Excel:</h4>
-           <div className="grid grid-cols-2 gap-2">
-              {['pertanyaan', 'opsi_a s/d e', 'kunci', 'kategori', 'paket_id', 'pembahasan'].map((item) => (
-                <div key={item} className="text-[8px] bg-[#5D4037] p-2 rounded-lg text-[#E6CEA0] font-black text-center uppercase tracking-tighter">
+            <h4 className="text-[9px] font-black text-[#A67C52] uppercase tracking-[0.2em] mb-4 text-center italic">Wajib ada di Header Excel:</h4>
+            <div className="grid grid-cols-2 gap-2">
+              {['pertanyaan', 'opsi_a s/d e', 'kunci', 'kategori', 'paket_id', 'pembahasan', 'poin_a s/d e', 'image_url'].map((item) => (
+                <div key={item} className={`text-[8px] p-2 rounded-lg font-black text-center uppercase tracking-tighter ${item === 'image_url' ? 'bg-[#A67C52] text-white' : 'bg-[#5D4037] text-[#E6CEA0]'}`}>
                   {item}
                 </div>
               ))}
-           </div>
+            </div>
+            <p className="text-[7px] text-[#A67C52] mt-4 text-center font-bold">* image_url diisi dengan link gambar (jika ada)</p>
         </div>
       </div>
-      {/* Tombol Kembali ini sekarang sudah berfungsi karena router sudah di-define */}
+
       <button 
         onClick={() => router.push('/dashboard')} 
         className="mt-6 text-[10px] font-black text-[#A67C52] uppercase tracking-widest hover:text-[#5D4037]"
