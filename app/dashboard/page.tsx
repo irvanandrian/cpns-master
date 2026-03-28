@@ -12,13 +12,8 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        router.push('/login');
-        return;
-      }
+      if (!user) { router.push('/login'); return; }
 
-      // Ambil data detail dari tabel profiles
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
@@ -31,26 +26,46 @@ export default function DashboardPage() {
     fetchProfile();
   }, [router]);
 
-  // Data Paket Soal 1 - 6
-  const daftarPaket = [
-    { id: "1", nama: "Paket 01: Try Out Gratis", tipe: "FREE", desc: "Uji kemampuan dasarmu dengan soal simulasi pertama." },
-    { id: "2", nama: "Paket 02: Pejuang SKD", tipe: "PREMIUM", desc: "45 Soal HOTS (TWK, TIU, TKP) standar BKN terbaru." },
-    { id: "3", nama: "Paket 03: Master NIP", tipe: "PREMIUM", desc: "Latihan intensif dengan pembahasan mendalam dan trik cepat." },
-    { id: "4", nama: "Paket 04: Prediksi Akurat", tipe: "PREMIUM", desc: "Kumpulan soal yang diprediksi muncul di tahun ini." },
-    { id: "5", nama: "Paket 05: Drilling TIU", tipe: "PREMIUM", desc: "Fokus pendalaman materi hitungan dan logika pecahan." },
-    { id: "6", nama: "Paket 06: Simulasi Final", tipe: "PREMIUM", desc: "Try out penutup dengan tingkat kesulitan maksimal." },
-  ];
-
-  // FUNGSI LOGIKA AKSES (ADMIN & PREMIUM)
-  const cekAkses = (tipePaket: string) => {
-    if (profile?.role === 'admin') return true; // Admin Sakti tembus semua
-    if (tipePaket === 'FREE') return true;      // Paket Free terbuka untuk semua
-    return profile?.is_premium === true;       // Sisanya hanya untuk yang sudah Premium
+  // DATABASE MASTER PAKET
+  const dataMasterPaket: any = {
+    cpns: [
+      { id: "1", nama: "CPNS Paket 01", desc: "Simulasi SKD standar BKN terbaru.", jenis: "cpns" },
+      { id: "2", nama: "CPNS Paket 02", desc: "Fokus materi HOTS (TWK, TIU, TKP).", jenis: "cpns" },
+      { id: "3", nama: "CPNS Paket 03", desc: "Latihan intensif Master NIP.", jenis: "cpns" },
+      { id: "4", nama: "CPNS Paket 04", desc: "Prediksi soal paling akurat.", jenis: "cpns" },
+      { id: "5", nama: "CPNS Paket 05", desc: "Drilling khusus TIU Logika.", jenis: "cpns" },
+      { id: "6", nama: "CPNS Paket 06", desc: "Simulasi Final penutup.", jenis: "cpns" },
+    ],
+    kedinasan: [
+      { id: "1", nama: "Kedinasan Paket 01", desc: "Persiapan masuk STIS/IPDN/STAN.", jenis: "kedinasan" },
+      { id: "2", nama: "Kedinasan Paket 02", desc: "Latihan soal integritas & logika.", jenis: "kedinasan" },
+      { id: "3", nama: "Kedinasan Paket 03", desc: "Simulasi perangkingan nasional.", jenis: "kedinasan" },
+    ],
+    bumn: [
+      { id: "1", nama: "BUMN Paket 01", desc: "Tes Kemampuan Dasar (TKD) & Akhlak.", jenis: "bumn" },
+      { id: "2", nama: "BUMN Paket 02", desc: "Tes Bahasa Inggris & TKB.", jenis: "bumn" },
+    ],
+    snbt: [
+      { id: "1", nama: "SNBT Paket 01", desc: "Pengetahuan Kuantitatif (PK).", jenis: "snbt" },
+      { id: "2", nama: "SNBT Paket 02", desc: "Penalaran Matematika (PM).", jenis: "snbt" },
+    ]
   };
 
+  // --- LOGIKA AKSES ---
+  let daftarPaket = [];
+  const isAdmin = profile?.role === 'admin';
+  const isPremium = profile?.is_premium === true; // Cek status premium
+  const userKategori = profile?.paket || "cpns";
+
+  if (isAdmin) {
+    daftarPaket = Object.values(dataMasterPaket).flat();
+  } else {
+    daftarPaket = dataMasterPaket[userKategori] || [];
+  }
+
   if (loading) return (
-    <div className="h-screen flex items-center justify-center bg-[#FDFBF9] font-black text-[#5D4037] tracking-widest">
-      MENYIAPKAN HALAMAN PEJUANG...
+    <div className="h-screen flex items-center justify-center bg-[#FDFBF9] font-black text-[#5D4037] tracking-widest text-[10px]">
+      MENYIAPKAN DASHBOARD PEJUANG...
     </div>
   );
 
@@ -62,16 +77,16 @@ export default function DashboardPage() {
         <div className="max-w-6xl mx-auto relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-                <span className={`px-3 py-1 rounded-lg text-[8px] font-black tracking-[0.2em] uppercase ${
-                    profile?.role === 'admin' ? 'bg-yellow-400 text-black' : 
-                    profile?.is_premium ? 'bg-[#E6CEA0] text-[#5D4037]' : 'bg-white/20 text-white'
-                }`}>
-                    {profile?.role === 'admin' ? '🔥 Super Admin' : profile?.is_premium ? '🌟 Premium Member' : '🆓 Free Account'}
+                <span className={`px-3 py-1 rounded-lg text-[8px] font-black tracking-[0.2em] uppercase ${isAdmin ? 'bg-yellow-400 text-black' : 'bg-[#E6CEA0] text-[#5D4037]'}`}>
+                  {isAdmin ? '🔥 Super Admin Mode' : isPremium ? `🌟 Premium ${userKategori}` : `☁️ Free Member`}
                 </span>
             </div>
             <h2 className="text-[#E6CEA0] text-3xl md:text-5xl font-black uppercase tracking-tighter">
-              {profile?.email?.split('@')[0]}
+              {profile?.nama || "Pejuang"}
             </h2>
+            <p className="text-[#E6CEA0]/60 text-[10px] font-bold uppercase mt-2 tracking-widest italic">
+              {isAdmin ? "Akses Tanpa Batas ke Seluruh Paket Soal" : isPremium ? "Selamat Belajar, Akses Paket Terbuka!" : "Upgrade ke Premium untuk Membuka Soal"}
+            </p>
           </div>
           <button 
             onClick={() => supabase.auth.signOut().then(() => router.push('/'))}
@@ -85,25 +100,46 @@ export default function DashboardPage() {
 
       {/* Grid Paket */}
       <div className="max-w-6xl mx-auto px-6 -mt-10">
+        
+        {/* Notifikasi Belum Bayar (Hanya Muncul Jika Bukan Admin & Bukan Premium) */}
+        {!isAdmin && !isPremium && (
+          <div className="mb-10 p-6 bg-white rounded-[2.5rem] border-2 border-dashed border-[#A67C52] shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 animate-pulse">
+            <div className="text-center md:text-left">
+              <p className="text-[10px] font-black text-[#5D4037] uppercase tracking-widest">⚠️ Akun Belum Aktif</p>
+              <p className="text-[9px] text-[#A67C52] font-bold mt-1">Selesaikan pembayaran untuk membuka akses paket soal {userKategori}.</p>
+            </div>
+            <a 
+              href="https://wa.me/628978720373?text=Halo%20Admin%20GaskeunNIP,%20saya%20ingin%20aktivasi%20akun%20Premium" 
+              target="_blank"
+              className="bg-[#25D366] text-white px-6 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest shadow-lg hover:scale-105 transition-all"
+            >
+              Konfirmasi via WhatsApp
+            </a>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {daftarPaket.map((paket) => {
-            const terbuka = cekAkses(paket.tipe);
-            
+          {daftarPaket.map((paket: any, index: number) => {
+            // Logika kunci: kebuka jika Admin ATAU User sudah Premium
+            const isLocked = !isAdmin && !isPremium;
+
             return (
               <div 
-                key={paket.id} 
-                className={`bg-white rounded-[2.5rem] p-8 shadow-xl border-2 transition-all duration-500 flex flex-col justify-between ${
-                  terbuka ? 'border-[#E6CEA0]/30 hover:-translate-y-2' : 'border-transparent opacity-70 grayscale-[0.5]'
-                }`}
+                key={index} 
+                className={`bg-white rounded-[2.5rem] p-8 shadow-xl border-2 transition-all duration-500 flex flex-col justify-between relative overflow-hidden ${isLocked ? 'border-gray-200 grayscale' : 'border-[#E6CEA0]/30 hover:-translate-y-2'}`}
               >
+                {isAdmin && (
+                  <div className="absolute top-0 right-0 bg-[#A67C52] text-white px-4 py-1 text-[8px] font-black uppercase rounded-bl-xl">
+                    {paket.jenis}
+                  </div>
+                )}
+
                 <div>
                   <div className="flex justify-between items-start mb-6">
-                    <span className={`px-4 py-1 rounded-full text-[9px] font-black tracking-widest ${
-                      paket.tipe === 'FREE' ? 'bg-green-100 text-green-700' : 'bg-[#5D4037] text-[#E6CEA0]'
-                    }`}>
-                      {paket.tipe}
+                    <span className={`px-4 py-1 rounded-full text-[9px] font-black tracking-widest uppercase ${isLocked ? 'bg-gray-100 text-gray-400' : 'bg-green-100 text-green-700'}`}>
+                      {isLocked ? 'TERKUNCI' : 'TERSEDIA'}
                     </span>
-                    {!terbuka && <span className="text-2xl">🔒</span>}
+                    <span className="text-xs font-black text-[#A67C52]">#{paket.id}</span>
                   </div>
                   
                   <h3 className="text-xl font-black text-[#5D4037] mb-3 uppercase tracking-tighter leading-tight">
@@ -114,32 +150,32 @@ export default function DashboardPage() {
                   </p>
                 </div>
 
-                {terbuka ? (
-                  <Link href={`/ujian?paket=${paket.id}`}>
+                {isLocked ? (
+                  <button 
+                    onClick={() => alert("Silakan aktivasi akun premium terlebih dahulu untuk membuka paket ini!")}
+                    className="w-full py-4 bg-gray-100 text-gray-400 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-gray-200 cursor-not-allowed"
+                  >
+                    🔒 Paket Terkunci
+                  </button>
+                ) : (
+                  <Link href={`/ujian?paket=${paket.id}&jenis=${paket.jenis || userKategori}`}>
                     <button className="w-full py-4 bg-[#5D4037] text-[#E6CEA0] rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-[#A67C52] transition-all">
                       Mulai Simulasi →
                     </button>
                   </Link>
-                ) : (
-                  <button 
-                    onClick={() => window.open('https://wa.me/628978720373?text=Halo%20Admin%2C%20saya%20ingin%20aktivasi%20Paket%20Premium%20GaskeunNIP', '_blank')}
-                    className="w-full py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-slate-200 hover:bg-[#5D4037] hover:text-[#E6CEA0] transition-all"
-                  >
-                    Beli Akses Premium
-                  </button>
                 )}
               </div>
             );
           })}
         </div>
 
-        {/* Info Tambahan */}
-        <div className="mt-16 bg-[#E6CEA0]/10 p-10 rounded-[3.5rem] border-2 border-dashed border-[#E6CEA0] text-center">
-          <p className="text-[#5D4037] font-black text-xs uppercase tracking-[0.3em] mb-3">Butuh Bantuan Aktivasi?</p>
-          <p className="text-[#795548] text-[10px] font-bold max-w-md mx-auto leading-relaxed">
-            Jika kamu sudah melakukan pembayaran namun paket masih terkunci, silakan kirim bukti transfer ke Mentor melalui WhatsApp Admin.
-          </p>
-        </div>
+        {/* Footer Admin info */}
+        {isAdmin && (
+           <div className="mt-12 p-6 bg-yellow-50 border-2 border-yellow-200 rounded-3xl text-center">
+              <p className="text-[10px] font-black text-yellow-800 uppercase tracking-widest">Dashboard Monitoring Admin</p>
+              <p className="text-[9px] text-yellow-700 mt-1 font-bold">Total {daftarPaket.length} paket terdeteksi dalam database sistem.</p>
+           </div>
+        )}
       </div>
     </div>
   );

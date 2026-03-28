@@ -63,13 +63,13 @@ export default function AdminPage() {
           kunci: s.kunci ? s.kunci.toString().toUpperCase() : null,
           kategori: s.kategori, 
           paket_id: s.paket_id || 1, 
+          jenis_ujian: s.jenis_ujian ? s.jenis_ujian.toLowerCase() : 'cpns',
           pembahasan: s.pembahasan || `Jawaban yang benar adalah ${s.kunci?.toUpperCase()}.`, 
           poin_a: parseInt(s.poin_a) || 0,
           poin_b: parseInt(s.poin_b) || 0,
           poin_c: parseInt(s.poin_c) || 0,
           poin_d: parseInt(s.poin_d) || 0,
           poin_e: parseInt(s.poin_e) || 0,
-          // UPDATE: Tambahkan kolom image_url agar bisa dibaca dari Excel
           image_url: s.image_url || null, 
         }));
 
@@ -101,7 +101,16 @@ export default function AdminPage() {
         </div>
         
         <h1 className="text-2xl font-black mb-2 text-center uppercase tracking-tighter">Gaskeun <span className="text-[#A67C52]">Admin</span></h1>
-        <p className="text-slate-400 text-[10px] text-center mb-8 font-bold uppercase tracking-widest">Upload Master Soal & Gambar (.xlsx)</p>
+        <p className="text-slate-400 text-[10px] text-center mb-6 font-bold uppercase tracking-widest">Panel Kontrol Master</p>
+
+        {/* --- TOMBOL NAVIGASI KE MANAJEMEN USER --- */}
+        <button 
+          onClick={() => router.push('/admin/users')}
+          className="mb-8 w-full py-4 bg-[#E6CEA0] text-[#5D4037] rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-[#5D4037] hover:text-[#E6CEA0] transition-all flex items-center justify-center gap-2"
+        >
+          👥 Kelola User & Aktivasi Premium
+        </button>
+        {/* ------------------------------------------ */}
         
         <div className="relative border-4 border-dashed border-[#FDFBF9] rounded-[2rem] p-8 hover:border-[#E6CEA0] transition-all group bg-[#FDFBF9]/50 shadow-inner">
           <input 
@@ -111,8 +120,8 @@ export default function AdminPage() {
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
           />
           <div className="text-center">
-            <p className="text-xs font-black text-[#5D4037] group-hover:scale-105 transition-transform uppercase">Pilih File Excel</p>
-            <p className="text-[9px] text-[#A67C52] mt-2 font-bold italic">Seret file ke sini untuk upload cepat</p>
+            <p className="text-xs font-black text-[#5D4037] group-hover:scale-105 transition-transform uppercase">Upload Master Soal</p>
+            <p className="text-[9px] text-[#A67C52] mt-2 font-bold italic">Format .xlsx sesuai header database</p>
           </div>
         </div>
         
@@ -125,15 +134,15 @@ export default function AdminPage() {
         )}
 
         <div className="mt-8 pt-6 border-t border-[#E6CEA0]/30">
-            <h4 className="text-[9px] font-black text-[#A67C52] uppercase tracking-[0.2em] mb-4 text-center italic">Wajib ada di Header Excel:</h4>
+            <h4 className="text-[9px] font-black text-[#A67C52] uppercase tracking-[0.2em] mb-4 text-center italic">Struktur Kolom Excel:</h4>
             <div className="grid grid-cols-2 gap-2">
-              {['pertanyaan', 'opsi_a s/d e', 'kunci', 'kategori', 'paket_id', 'pembahasan', 'poin_a s/d e', 'image_url'].map((item) => (
-                <div key={item} className={`text-[8px] p-2 rounded-lg font-black text-center uppercase tracking-tighter ${item === 'image_url' ? 'bg-[#A67C52] text-white' : 'bg-[#5D4037] text-[#E6CEA0]'}`}>
+              {['pertanyaan', 'opsi_a s/d e', 'kunci', 'kategori', 'paket_id', 'jenis_ujian', 'pembahasan', 'poin_a s/d e', 'image_url'].map((item) => (
+                <div key={item} className={`text-[8px] p-2 rounded-lg font-black text-center uppercase tracking-tighter ${['image_url', 'jenis_ujian'].includes(item) ? 'bg-[#A67C52] text-white' : 'bg-[#5D4037] text-[#E6CEA0]'}`}>
                   {item}
                 </div>
               ))}
             </div>
-            <p className="text-[7px] text-[#A67C52] mt-4 text-center font-bold">* image_url diisi dengan link gambar (jika ada)</p>
+            <p className="text-[7px] text-[#A67C52] mt-4 text-center font-bold">* jenis_ujian: cpns, bumn, snbt, atau kedinasan</p>
         </div>
       </div>
 
