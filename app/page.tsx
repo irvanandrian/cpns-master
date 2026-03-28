@@ -1,173 +1,189 @@
 "use client";
-import { useEffect } from "react";
+
+import React, { useEffect } from "react";
 import Link from 'next/link';
-export default function LandingPage() {
+
+export default function Home() {
+  // 1. FITUR KEAMANAN: ANTI KLIK KANAN
   useEffect(() => {
-    const handleContextMenu = (e: any) => {
+    const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
-      alert("Klik kanan dilarang!");
+      alert("Fitur Keamanan Aktif: Klik kanan dilarang!");
     };
     document.addEventListener("contextmenu", handleContextMenu);
     return () => document.removeEventListener("contextmenu", handleContextMenu);
   }, []);
+
+  // Pastikan file ini ada di folder /public/poster.jpg
+  const photoUrl = "/poster.jpg"; 
+
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans select-none">
-      {/* Header / Navbar */}
-      <nav className="flex justify-between items-center px-10 py-6 bg-white shadow-sm">
-        <h1 className="text-2xl font-bold text-blue-600">Tipe-X<span className="text-orange-500">Taruna</span></h1>
-        <div className="space-x-6">
-          <a href="#" className="hover:text-blue-600">Paket Soal</a>
-          <a href="#" className="hover:text-blue-600">Testimoni</a>
-          <Link href="/login">
-  <button className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition">
-    Login
-  </button>
-</Link>
+    <div className="min-h-screen bg-[#FDFBF9] text-[#42271E] font-sans select-none scroll-smooth">
+      
+      {/* 2. NAVBAR MODERN */}
+      <nav className="fixed top-0 left-0 right-0 bg-[#5D4037]/95 backdrop-blur-md z-50 shadow-lg">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-black text-[#E6CEA0] tracking-tighter uppercase">
+              GASKEUN<span className="text-white">NIP</span>
+            </span>
+          </div>
           
+          <div className="hidden lg:flex items-center gap-8 text-white/90 font-black text-[10px] uppercase tracking-widest">
+            {/* Terhubung ke ID #paket */}
+            <a href="#paket" className="hover:text-[#E6CEA0] transition">Paket Soal</a>
+            <a href="#testimoni" className="hover:text-[#E6CEA0] transition">Testimoni</a>
+            <a href="#keunggulan" className="hover:text-[#E6CEA0] transition">Keunggulan</a>
+          </div>
+
+          <div className="flex gap-3">
+            <Link href="/login">
+              <button className="bg-[#E6CEA0] text-[#5D4037] px-6 py-2 rounded-full font-black text-[10px] uppercase hover:bg-white transition shadow-md">
+                Masuk Akun
+              </button>
+            </Link>
+          </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="max-w-6xl mx-auto px-10 py-20 text-center">
-        <h2 className="text-5xl font-extrabold leading-tight">
-          Lolos Ujian Impian dengan <br /> 
-          <span className="text-blue-600">Simulasi Try Out Terakurat</span>
-        </h2>
-        <p className="mt-6 text-xl text-gray-600 max-w-2xl mx-auto">
-          Dapatkan pengalaman ujian seperti aslinya dengan sistem timer, 
-          pembahasan mendalam, dan analisis skor otomatis.
-        </p>
-        <div className="mt-10 flex justify-center gap-4">
-          <Link href="/login">
-  <button className="bg-orange-500 text-white px-8 py-4 rounded-lg text-lg font-bold shadow-lg hover:bg-orange-600">
-    Coba Gratis
-  </button>
-</Link>
-          <button className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-lg text-lg font-bold hover:bg-blue-50">
-            Lihat Paket Berbayar
-          </button>
-        </div>
-      </main>
+      {/* 3. HERO SECTION */}
+      <section className="relative pt-40 pb-32 bg-[#5D4037] overflow-hidden text-center px-6">
+        <div className="max-w-7xl mx-auto relative z-10">
+          
+          {/* FOTO OWNER */}
+          <div className="relative inline-block mb-12 group">
+            <div className="absolute -inset-4 bg-[#E6CEA0] rounded-[2.5rem] blur-xl opacity-20"></div>
+            <img 
+              src={photoUrl} 
+              alt="Owner GaskeunNIP" 
+              className="relative w-full max-w-sm md:max-w-md h-auto rounded-3xl border-4 border-[#E6CEA0]/30 shadow-2xl transition-transform duration-700 hover:scale-[1.03]"
+              onError={(e) => { e.currentTarget.src = "https://ui-avatars.com/api/?name=Owner&background=E6CEA0&color=5D4037&size=400" }}
+            />
+          </div>
 
-      {/* Keunggulan Section */}
-      <section className="bg-white py-16">
-        <div className="max-w-6xl mx-auto px-10 grid grid-cols-1 md:grid-cols-3 gap-10">
-          <div className="p-6 bg-blue-50 rounded-xl">
-            <h3 className="text-xl font-bold mb-2">⏱️ Timer Real-time</h3>
-            <p className="text-gray-600">Simulasi waktu sesuai standar ujian nasional.</p>
+          <h1 className="text-5xl md:text-7xl font-black text-white leading-tight uppercase tracking-tighter mb-6">
+            Sekali <span className="text-[#E6CEA0]">Tampil</span><br />
+            Harus <span className="text-[#E6CEA0]">Berhasil</span>
+          </h1>
+          
+          <p className="text-white/70 text-lg md:text-xl font-medium italic mb-12">
+            "Gaskeun belajarnya, amankan NIP nya"
+          </p>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-2xl mx-auto">
+            <Link href="/login" className="flex-1">
+              <button className="w-full bg-[#E6CEA0] text-[#5D4037] px-10 py-5 rounded-2xl font-black text-xs uppercase shadow-2xl hover:bg-white transition-all tracking-widest">
+                Coba Gratis Sekarang
+              </button>
+            </Link>
+            
+            {/* Tombol Terhubung ke ID #paket */}
+            <a href="#paket" className="flex-1">
+              <button className="w-full border-2 border-[#E6CEA0] text-[#E6CEA0] px-10 py-5 rounded-2xl font-black text-xs uppercase hover:bg-[#E6CEA0]/10 transition-all tracking-widest">
+                Lihat Paket Berbayar
+              </button>
+            </a>
           </div>
-          <div className="p-6 bg-green-50 rounded-xl">
-            <h3 className="text-xl font-bold mb-2">📊 Skor Otomatis</h3>
-            <p className="text-gray-600">Nilai langsung keluar begitu kamu selesai mengerjakan.</p>
+        </div>
+
+        {/* Efek Gelombang Bawah */}
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-[#FDFBF9]" style={{ clipPath: 'ellipse(60% 100% at 50% 100%)' }}></div>
+      </section>
+
+      {/* 4. KEUNGGULAN SECTION */}
+      <section id="keunggulan" className="py-32 px-6 max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
+        {[
+          { icon: "⏱️", title: "Timer Real-time", desc: "Simulasi waktu ujian sesuai standar BKN agar mentalmu terasah.", border: "border-[#E6CEA0]" },
+          { icon: "📊", title: "Skor Otomatis", desc: "Nilai langsung keluar beserta analisis mendalam di setiap materi soal.", border: "border-[#A67C52]" },
+          { icon: "🚫", title: "Anti-Screenshot", desc: "Keamanan konten soal terjaga eksklusif dengan sistem proteksi terbaru.", border: "border-[#3E2723]" }
+        ].map((item, idx) => (
+          <div key={idx} className={`bg-white p-10 rounded-[3rem] shadow-xl border-b-8 ${item.border} hover:-translate-y-3 transition-all duration-500`}>
+            <div className="text-6xl mb-8">{item.icon}</div>
+            <h3 className="text-xl font-black text-[#5D4037] mb-4 uppercase tracking-tight">{item.title}</h3>
+            <p className="text-[#795548] text-sm leading-relaxed">{item.desc}</p>
           </div>
-          <div className="p-6 bg-purple-50 rounded-xl">
-            <h3 className="text-xl font-bold mb-2">🚫 Anti-Screenshot</h3>
-            <p className="text-gray-600">Keamanan konten soal terjaga dengan proteksi sistem.</p>
+        ))}
+      </section>
+
+      {/* 5. TESTIMONI SECTION */}
+      <section id="testimoni" className="py-32 bg-[#E6CEA0]/10 border-y border-[#E6CEA0]/20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-sm font-black text-[#A67C52] uppercase tracking-[0.4em] mb-4">Success Story</h2>
+            <h3 className="text-4xl font-black text-[#3E2723] uppercase">Apa Kata Alumni?</h3>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-[#E6CEA0]/30 relative">
+              <span className="text-6xl absolute top-6 right-8 text-[#E6CEA0]/20 font-black">“</span>
+              <p className="text-[#5D4037] italic text-sm leading-relaxed mb-8 relative z-10">
+                "Soal-soalnya mirip banget sama ujian aslinya! Berkat simulasi di sini, aku jadi nggak grogi pas hari H."
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-[#5D4037] rounded-2xl flex items-center justify-center text-[#E6CEA0] font-black">A</div>
+                <div>
+                  <h4 className="font-black text-[#3E2723] text-sm uppercase">Andi Pratama</h4>
+                  <p className="text-[10px] font-bold text-[#A67C52] uppercase tracking-widest">Lolos CPNS 2025</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
-      {/* Section Testimoni */}
-<section className="py-20 bg-gray-50">
-  <div className="max-w-6xl mx-auto px-10">
-    <h2 className="text-3xl font-bold text-center mb-12">Apa Kata Mereka?</h2>
-    
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {/* Kartu Testimoni 1 */}
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-        <p className="text-gray-600 italic mb-6">"Soal-soalnya mirip banget sama ujian aslinya! Berkat simulasi di sini, aku jadi nggak grogi pas hari H."</p>
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">A</div>
-          <div>
-            <h4 className="font-bold">Andi Pratama</h4>
-            <p className="text-xs text-gray-500">Lolos CPNS 2025</p>
+
+      {/* 6. DAFTAR HARGA SECTION */}
+      <section id="paket" className="py-32 px-6 bg-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto text-center relative z-10">
+          <h2 className="text-sm font-black text-[#A67C52] uppercase tracking-[0.4em] mb-4">Pilih Investasi Terbaik</h2>
+          <h3 className="text-4xl font-black text-[#3E2723] mb-20 uppercase">Paket Belajar Pejuang</h3>
+          
+          <div className="flex justify-center">
+            {/* Paket Utama */}
+            <div className="bg-[#5D4037] p-12 rounded-[4rem] shadow-2xl relative max-w-md w-full border-4 border-[#E6CEA0] transform hover:scale-[1.02] transition-all">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#E6CEA0] text-[#5D4037] px-8 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">REKOMENDASI</div>
+              
+              <h3 className="text-lg font-bold mb-2 text-white/60 uppercase">Paket Pejuang NIP</h3>
+              <div className="text-6xl font-black mb-10 text-[#E6CEA0] tracking-tighter">Rp 30k</div>
+              
+              <ul className="text-left space-y-5 mb-12 text-white/90 text-[11px] font-bold uppercase tracking-wide">
+                <li className="flex items-center gap-3">
+                  <span className="text-[#E6CEA0]">✔</span> 10x Try Out Full (TWK, TIU, TKP)
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="text-[#E6CEA0]">✔</span> Pembahasan Teks Lengkap
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="text-[#E6CEA0]">✔</span> Grafik Statistik Kelulusan
+                </li>
+                <li className="flex items-center gap-3">
+                  <span className="text-[#E6CEA0]">✔</span> Akses Selamanya
+                </li>
+              </ul>
+              
+              <Link href="/login">
+                <button className="w-full bg-[#E6CEA0] text-[#5D4037] py-5 rounded-[2rem] font-black text-xs uppercase tracking-widest hover:bg-white transition-all shadow-xl">
+                  Amankan Kuota Sekarang
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Kartu Testimoni 2 */}
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-        <p className="text-gray-600 italic mb-6">"Fitur anti-screenshot nya keren banget, berasa ujian beneran. Pembahasan soalnya juga gampang dimengerti."</p>
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-pink-500 rounded-full flex items-center justify-center text-white font-bold">S</div>
-          <div>
-            <h4 className="font-bold">Siti Aminah</h4>
-            <p className="text-xs text-gray-500">Mahasiswa Kedokteran</p>
+      {/* 7. FOOTER */}
+      <footer className="bg-[#3E2723] py-20 text-center border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="font-black text-[#E6CEA0] mb-6 text-3xl uppercase tracking-[0.5em]">GaskeunNIP</p>
+          <div className="flex justify-center gap-8 mb-10 text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">
+            <a href="#" className="hover:text-white transition">Privacy Policy</a>
+            <a href="#" className="hover:text-white transition">Terms of Service</a>
+            <a href="#" className="hover:text-white transition">Contact Us</a>
           </div>
+          <p className="text-[9px] text-white/20 uppercase font-black tracking-widest leading-loose">
+            &copy; 2026 GaskeunNIP Indonesia. Dibuat dengan semangat membara untuk seluruh pejuang NIP di Indonesia.
+          </p>
         </div>
-      </div>
+      </footer>
 
-      {/* Kartu Testimoni 3 */}
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-        <p className="text-gray-600 italic mb-6">"Sistem pembayarannya otomatis, langsung bisa akses soal setelah bayar. Sangat membantu buat persiapan UTBK!"</p>
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">B</div>
-          <div>
-            <h4 className="font-bold">Budi Santoso</h4>
-            <p className="text-xs text-gray-500">Siswa SMA Jakarta</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-{/* Section Daftar Harga */}
-<section className="py-20 bg-white">
-  <div className="max-w-6xl mx-auto px-10 text-center">
-    <h2 className="text-3xl font-bold mb-4">Pilih Paket Belajarmu</h2>
-    <p className="text-gray-600 mb-12">Investasi terbaik adalah untuk masa depanmu.</p>
-
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      
-      {/* Paket Gratis */}
-      <div className="border border-gray-200 p-8 rounded-2xl flex flex-col hover:border-blue-500 transition">
-        <h3 className="text-xl font-bold mb-2">Paket Coba-Coba</h3>
-        <div className="text-3xl font-black mb-6">Gratis</div>
-        <ul className="text-left space-y-4 mb-8 text-gray-600 flex-grow">
-          <li>✅ 1x Try Out Simulasi</li>
-          <li>✅ Pembahasan Dasar</li>
-          <li>❌ Analisis Skor Detail</li>
-        </ul>
-        <Link href="/login" className="block bg-gray-100 py-3 rounded-lg font-bold hover:bg-gray-200">
-          Coba Sekarang
-        </Link>
-      </div>
-
-      {/* Paket Populer (Premium) */}
-      <div className="border-2 border-blue-600 p-8 rounded-2xl flex flex-col relative shadow-xl transform scale-105 bg-white">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold">
-          TERPOPULER
-        </div>
-        <h3 className="text-xl font-bold mb-2">Paket Pejuang</h3>
-        <div className="text-3xl font-black mb-6 text-blue-600">Rp 99.000</div>
-        <ul className="text-left space-y-4 mb-8 text-gray-600 flex-grow">
-          <li>✅ 10x Try Out Full</li>
-          <li>✅ Pembahasan Video & Teks</li>
-          <li>✅ Ranking Nasional</li>
-          <li>✅ Grup Diskusi Premium</li>
-        </ul>
-        <Link href="/login" className="block bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700">
-          Beli Sekarang
-        </Link>
-      </div>
-
-      {/* Paket Sultan */}
-      <div className="border border-gray-200 p-8 rounded-2xl flex flex-col hover:border-blue-500 transition">
-        <h3 className="text-xl font-bold mb-2">Paket Intensif</h3>
-        <div className="text-3xl font-black mb-6 text-orange-500">Rp 199.000</div>
-        <ul className="text-left space-y-4 mb-8 text-gray-600 flex-grow">
-          <li>✅ Unlimited Try Out</li>
-          <li>✅ Mentor Pribadi (Chat)</li>
-          <li>✅ Prediksi Soal Akurat</li>
-          <li>✅ Garansi Uang Kembali</li>
-        </ul>
-        <Link href="/login" className="block border-2 border-orange-500 text-orange-500 py-3 rounded-lg font-bold hover:bg-orange-50">
-          Ambil Paket Ini
-        </Link>
-      </div>
-
-    </div>
-  </div>
-</section>
     </div>
   );
 }
