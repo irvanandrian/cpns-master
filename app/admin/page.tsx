@@ -1,10 +1,38 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Tambah useEffect
 import * as XLSX from 'xlsx';
 import { supabase } from '../lib/supabase'; 
+import { useRouter } from 'next/navigation'; // Tambah import ini
 
 export default function AdminPage() {
   const [status, setStatus] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false); // State untuk cek admin
+  const router = useRouter(); // DEFINE ROUTER DI SINI
+
+  // PROTEKSI: Cek apakah yang buka halaman ini beneran Admin
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.role !== 'admin') {
+        alert("Hanya Admin yang boleh masuk!");
+        router.push('/dashboard');
+      } else {
+        setIsAdmin(true);
+      }
+    };
+    checkAdmin();
+  }, [router]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -25,7 +53,6 @@ export default function AdminPage() {
           return;
         }
 
-        // MAPPING DATA TERBARU (DENGAN PEMBAHASAN)
         const formatSoal = rawData.map((s: any) => ({
           pertanyaan: s.pertanyaan,
           opsi_a: s.opsi_a,
@@ -36,7 +63,6 @@ export default function AdminPage() {
           kunci: s.kunci ? s.kunci.toString().toUpperCase() : null,
           kategori: s.kategori, 
           paket_id: s.paket_id || 1, 
-          // Tambahkan baris ini untuk membaca kolom pembahasan dari Excel
           pembahasan: s.pembahasan || `Jawaban yang benar adalah ${s.kunci?.toUpperCase()}.`, 
           poin_a: parseInt(s.poin_a) || 0,
           poin_b: parseInt(s.poin_b) || 0,
@@ -60,6 +86,9 @@ export default function AdminPage() {
     };
     reader.readAsBinaryString(file);
   };
+
+  // Jangan tampilkan apa-apa selama ngecek status admin
+  if (!isAdmin) return null;
 
   return (
     <div className="p-10 flex flex-col items-center min-h-screen bg-[#FDFBF9] text-[#42271E] font-sans">
@@ -105,7 +134,13 @@ export default function AdminPage() {
            </div>
         </div>
       </div>
-      <button onClick={() => router.push('/dashboard')} className="mt-6 text-[10px] font-black text-[#A67C52] uppercase tracking-widest hover:text-[#5D4037]">← Kembali ke Dashboard</button>
+      {/* Tombol Kembali ini sekarang sudah berfungsi karena router sudah di-define */}
+      <button 
+        onClick={() => router.push('/dashboard')} 
+        className="mt-6 text-[10px] font-black text-[#A67C52] uppercase tracking-widest hover:text-[#5D4037]"
+      >
+        ← Kembali ke Dashboard
+      </button>
     </div>
   );
 }
