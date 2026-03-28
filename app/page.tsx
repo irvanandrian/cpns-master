@@ -17,6 +17,27 @@ export default function Home() {
     return () => document.removeEventListener("contextmenu", handleContextMenu);
   }, []);
 
+  // 1.1 FITUR MUSIK: AUTO PLAY & LOOP (Mulai saat ada interaksi pertama)
+  useEffect(() => {
+    const audio = new Audio("/Pompeii.mp3"); // <--- Simpan file musik.mp3 di folder public
+    audio.loop = true;
+
+    const playAudio = () => {
+      audio.play().catch(() => {
+        console.log("Menunggu interaksi user untuk memutar musik...");
+      });
+      // Hapus listener agar tidak dijalankan berulang kali setiap klik
+      window.removeEventListener("click", playAudio);
+    };
+
+    window.addEventListener("click", playAudio);
+    
+    return () => {
+      audio.pause();
+      window.removeEventListener("click", playAudio);
+    };
+  }, []);
+
   const photoUrl = "/poster.jpg"; 
 
   const faqs = [
@@ -150,7 +171,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* NEW: FAQ SECTION (AKORDEON) */}
+      {/* 6. FAQ SECTION */}
       <section id="faq" className="py-32 px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-16">
@@ -179,7 +200,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. DAFTAR HARGA SECTION */}
+      {/* 7. DAFTAR HARGA SECTION */}
       <section id="paket" className="py-32 px-6 bg-[#FDFBF9] relative overflow-hidden">
         <div className="max-w-7xl mx-auto text-center relative z-10">
           <h2 className="text-sm font-black text-[#A67C52] uppercase tracking-[0.4em] mb-4">Pilih Investasi Terbaik</h2>
@@ -209,7 +230,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 7. FOOTER */}
+      {/* 8. FOOTER */}
       <footer className="bg-[#3E2723] py-20 text-center border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6">
           <p className="font-black text-[#E6CEA0] mb-6 text-3xl uppercase tracking-[0.5em]">GaskeunNIP</p>
@@ -224,7 +245,7 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* 8. FLOATING WHATSAPP BUTTON */}
+      {/* 9. FLOATING WHATSAPP BUTTON */}
       <a 
         href="https://wa.me/628978720373?text=Halo%20Admin%20GaskeunNIP,%20saya%20ingin%20tanya%20tentang%20Paket%20Pejuang%20NIP" 
         target="_blank" 
