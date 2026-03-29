@@ -90,10 +90,10 @@ export default function Home() {
   };
 
   const paketHarga = [
-    { id: 'cpns', title: "Paket CPNS", harga: "30k", fitur: ["10x Try Out Full", "Pembahasan Teks", "Grup Belajar", "Akses Selamanya"] },
+    { id: 'cpns', title: "Paket CPNS", harga: "40k", fitur: ["10x Try Out Full", "Pembahasan Teks", "Grup Belajar", "Akses Selamanya"] },
     { id: 'bumn', title: "Paket BUMN ", harga: "45k", fitur: ["Materi AKHLAK", "TKD Standard FHCI", "Vidio Tips Interview", "Update Soal Berkala"] },
-    { id: 'kedinasan', title: "Paket Sekolah Kedinasan", harga: "50k", fitur: ["Simulasi SKD Lengkap", "Bank Soal 5 Tahun", "Konsultasi Jurusan", "Rank Nasional"] },
-    { id: 'snbt', title: "Paket SNBT", harga: "25k", fitur: ["Trik Cepat PK", "Penalaran Umum", "Analisis Peluang Lolos", "E-Sertifikat TO"] }
+    { id: 'kedinasan', title: "Paket Sekolah Kedinasan", harga: "40k", fitur: ["Simulasi SKD Lengkap", "Bank Soal 5 Tahun", "Konsultasi Jurusan", "Rank Nasional"] },
+    { id: 'snbt', title: "Paket SNBT", harga: "30k", fitur: ["Trik Cepat PK", "Penalaran Umum", "Analisis Peluang Lolos", "E-Sertifikat TO"] }
   ];
 
   const testimoniData = [

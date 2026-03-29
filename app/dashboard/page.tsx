@@ -77,15 +77,15 @@ export default function DashboardPage() {
         <div className="max-w-6xl mx-auto relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-                <span className={`px-3 py-1 rounded-lg text-[8px] font-black tracking-[0.2em] uppercase ${isAdmin ? 'bg-yellow-400 text-black' : 'bg-[#E6CEA0] text-[#5D4037]'}`}>
-                  {isAdmin ? '🔥 Super Admin Mode' : isPremium ? `🌟 Premium ${userKategori}` : `☁️ Free Member`}
+                <span className={`px-3 py-1 rounded-lg text-[8px] font-black tracking-[0.2em] uppercase ${isAdmin ? 'bg-yellow-400 text-black' : isPremium ? 'bg-[#E6CEA0] text-[#5D4037]' : 'bg-green-500 text-white'}`}>
+                  {isAdmin ? '🔥 Super Admin Mode' : isPremium ? `🌟 Premium ${userKategori}` : `🎁 Akses Gratis Sementara`}
                 </span>
             </div>
             <h2 className="text-[#E6CEA0] text-3xl md:text-5xl font-black uppercase tracking-tighter">
               {profile?.nama || "Pejuang"}
             </h2>
             <p className="text-[#E6CEA0]/60 text-[10px] font-bold uppercase mt-2 tracking-widest italic">
-              {isAdmin ? "Akses Tanpa Batas ke Seluruh Paket Soal" : isPremium ? "Selamat Belajar, Akses Paket Terbuka!" : "Upgrade ke Premium untuk Membuka Soal"}
+              {isAdmin ? "Akses Tanpa Batas ke Seluruh Paket Soal" : (isPremium || userKategori === 'kedinasan') ? "Selamat Belajar, Akses Paket Terbuka!" : "Upgrade ke Premium untuk Membuka Soal"}
             </p>
           </div>
           <button 
@@ -101,8 +101,8 @@ export default function DashboardPage() {
       {/* Grid Paket */}
       <div className="max-w-6xl mx-auto px-6 -mt-10">
         
-        {/* Notifikasi Belum Bayar (Hanya Muncul Jika Bukan Admin & Bukan Premium) */}
-        {!isAdmin && !isPremium && (
+        {/* Notifikasi Belum Bayar - Sembunyikan jika user kedinasan (karena free) */}
+        {!isAdmin && !isPremium && userKategori !== 'kedinasan' && (
           <div className="mb-10 p-6 bg-white rounded-[2.5rem] border-2 border-dashed border-[#A67C52] shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 animate-pulse">
             <div className="text-center md:text-left">
               <p className="text-[10px] font-black text-[#5D4037] uppercase tracking-widest">⚠️ Akun Belum Aktif</p>
@@ -120,14 +120,22 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {daftarPaket.map((paket: any, index: number) => {
-            // Logika kunci: kebuka jika Admin ATAU User sudah Premium
-            const isLocked = !isAdmin && !isPremium;
+            // PERUBAHAN DI SINI:
+            // Logika kunci: kebuka jika Admin ATAU User sudah Premium ATAU paketnya adalah Kedinasan
+            const isLocked = !isAdmin && !isPremium && paket.jenis !== 'kedinasan';
 
             return (
               <div 
                 key={index} 
                 className={`bg-white rounded-[2.5rem] p-8 shadow-xl border-2 transition-all duration-500 flex flex-col justify-between relative overflow-hidden ${isLocked ? 'border-gray-200 grayscale' : 'border-[#E6CEA0]/30 hover:-translate-y-2'}`}
               >
+                {/* Badge Free Sementara */}
+                {paket.jenis === 'kedinasan' && !isPremium && !isAdmin && (
+                   <div className="absolute top-0 right-0 bg-green-500 text-white px-4 py-1 text-[7px] font-black uppercase rounded-bl-xl shadow-md">
+                     Promo Free
+                   </div>
+                )}
+
                 {isAdmin && (
                   <div className="absolute top-0 right-0 bg-[#A67C52] text-white px-4 py-1 text-[8px] font-black uppercase rounded-bl-xl">
                     {paket.jenis}
