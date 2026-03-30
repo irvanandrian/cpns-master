@@ -37,7 +37,7 @@ export default function DashboardPage() {
       { id: "6", nama: "CPNS Paket 06", desc: "Simulasi Final penutup.", jenis: "cpns" },
     ],
     kedinasan: [
-      { id: "1", nama: "Kedinasan Paket 01", desc: "Persiapan masuk STIS/IPDN/STAN.", jenis: "kedinasan" },
+      { id: "1", nama: "Kedinasan Paket 01", desc: "Persiapan masuk Sekolah Kedinasan.", jenis: "kedinasan" },
       { id: "2", nama: "Kedinasan Paket 02", desc: "Latihan soal integritas & logika.", jenis: "kedinasan" },
       { id: "3", nama: "Kedinasan Paket 03", desc: "Simulasi perangkingan nasional.", jenis: "kedinasan" },
     ],

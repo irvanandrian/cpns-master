@@ -45,7 +45,6 @@ export default function Home() {
         audioRef.current.play()
           .then(() => {
             setIsPlaying(true);
-            // Hapus listener setelah musik berhasil jalan
             document.removeEventListener("click", handleFirstClick);
           })
           .catch((err) => console.log("Menunggu interaksi user...", err));
@@ -91,9 +90,9 @@ export default function Home() {
 
   const paketHarga = [
     { id: 'cpns', title: "Paket CPNS", harga: "40k", fitur: ["10x Try Out Full", "Pembahasan Teks", "Grup Belajar", "Akses Selamanya"] },
-    { id: 'bumn', title: "Paket BUMN ", harga: "45k", fitur: ["Materi AKHLAK", "TKD Standard FHCI", "Vidio Tips Interview", "Update Soal Berkala"] },
-    { id: 'kedinasan', title: "Paket Sekolah Kedinasan", harga: "40k", fitur: ["Simulasi SKD Lengkap", "Bank Soal 5 Tahun", "Konsultasi Jurusan", "Rank Nasional"] },
-    { id: 'snbt', title: "Paket SNBT", harga: "30k", fitur: ["Trik Cepat PK", "Penalaran Umum", "Analisis Peluang Lolos", "E-Sertifikat TO"] }
+    { id: 'bumn', title: "Paket BUMN ", harga: "45k", fitur: ["Materi AKHLAK", "TKD Standard FHCI", "Grup Sharing", "Update Soal Berkala"] },
+    { id: 'kedinasan', title: "Paket Sekolah Kedinasan", harga: "40k", fitur: ["Simulasi SKD Lengkap", "Bank Soal 5 Tahun", "Konsultasi Jurusan"] },
+    { id: 'snbt', title: "Paket SNBT", harga: "20k", fitur: ["Trik Cepat PK", "Penalaran Umum"] }
   ];
 
   const testimoniData = [
@@ -104,7 +103,7 @@ export default function Home() {
   ];
 
   const faqData = [
-    { q: "Apakah soal selalu update?", a: "Ya! Kami memperbarui bank soal setiap minggu sesuai kisi-kisi terbaru 2026." },
+    { q: "Apakah soal selalu update?", a: "Ya! Kami memperbarui bank soal setiap bulan sesuai kisi-kisi terbaru 2026." },
     { q: "Berapa lama masa aktif paket?", a: "Sekali bayar, akses selamanya! Tidak ada biaya langganan bulanan." },
     { q: "Bisa akses lewat HP/Tablet?", a: "Sangat bisa. Desain kami responsif untuk belajar di mana saja." },
     { q: "Ada grup diskusi?", a: "Tersedia grup Telegram eksklusif untuk diskusi bareng mentor dan sesama pejuang." }
@@ -123,19 +122,34 @@ export default function Home() {
           </span>
           <div className="hidden md:flex items-center gap-8 text-[10px] font-black text-white/70 uppercase tracking-widest">
             <a href="#paket" className="hover:text-[#E6CEA0]">Pilihan Paket</a>
+            {/* TAMBAHAN NAVIGASI TES KORAN */}
+            <Link href="/tes-koran" className="text-[#E6CEA0] hover:text-white flex items-center gap-1">
+              <span className="animate-pulse">●</span> Tes Koran
+            </Link>
             <a href="#testimoni" className="hover:text-[#E6CEA0]">Testimoni</a>
             <a href="#faq" className="hover:text-[#E6CEA0]">FAQ</a>
           </div>
-          <Link href="/login">
-            <button className="bg-[#E6CEA0] text-[#5D4037] px-6 py-2 rounded-full font-black text-[10px] uppercase hover:bg-white transition shadow-md">Masuk Akun</button>
-          </Link>
+          
+          {/* AUTH BUTTONS */}
+          <div className="flex items-center gap-3">
+            <Link href="/register">
+              <button className="hidden sm:block border-2 border-[#E6CEA0] text-[#E6CEA0] px-6 py-2 rounded-full font-black text-[10px] uppercase hover:bg-[#E6CEA0] hover:text-[#5D4037] transition-all">
+                Daftar Akun
+              </button>
+            </Link>
+            <Link href="/login">
+              <button className="bg-[#E6CEA0] text-[#5D4037] px-6 py-2 rounded-full font-black text-[10px] uppercase hover:bg-white transition shadow-md">
+                Masuk Akun
+              </button>
+            </Link>
+          </div>
         </div>
       </nav>
 
       {/* HERO */}
       <section className="relative pt-40 pb-32 bg-[#5D4037] text-center px-6">
         <div className="max-w-7xl mx-auto z-10 relative">
-          <img src="/poster.jpg" className="mx-auto w-full max-w-sm rounded-[3rem] border-4 border-[#E6CEA0]/30 shadow-2xl mb-12 object-cover" alt="Owner" />
+          <img src="/poster1.png" className="mx-auto w-full max-w-sm rounded-[3rem] border-4 border-[#E6CEA0]/30 shadow-2xl mb-12 object-cover" alt="Owner" />
           <h1 className="text-5xl md:text-7xl font-black text-white leading-tight uppercase mb-6 tracking-tighter">
             Sekali <span className="text-[#E6CEA0]">Tampil</span><br /> Harus <span className="text-[#E6CEA0]">Berhasil</span>
           </h1>
@@ -191,7 +205,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FAQ SECTION (DIBAWAH TESTIMONI) */}
+      {/* FAQ SECTION */}
       <section id="faq" className="py-24 bg-white">
         <div className="max-w-3xl mx-auto px-6">
           <div className="text-center mb-16">
@@ -207,12 +221,22 @@ export default function Home() {
       </section>
 
       {/* FLOATING BUTTONS */}
-      <button 
-        onClick={toggleMusic}
-        className="fixed bottom-8 left-8 w-14 h-14 bg-[#5D4037] text-[#E6CEA0] rounded-full shadow-2xl z-[100] border-4 border-white flex items-center justify-center animate-bounce hover:scale-110 transition-transform"
-      >
-        <span className="text-xl">{isPlaying ? "⏸️" : "▶️"}</span>
-      </button>
+      <div className="fixed bottom-8 left-8 flex flex-col gap-3 z-[100]">
+        {/* BUTTON NAVIGASI TES KORAN FLOATING */}
+        <Link href="/tes-koran">
+          <button className="w-14 h-14 bg-[#E6CEA0] text-[#5D4037] rounded-full shadow-2xl border-4 border-white flex items-center justify-center hover:scale-110 transition-transform group relative">
+            <span className="text-xl">✍️</span>
+            <span className="absolute left-16 bg-[#5D4037] text-[#E6CEA0] px-3 py-1 rounded text-[8px] font-black uppercase whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Latihan Tes Koran</span>
+          </button>
+        </Link>
+        
+        <button 
+          onClick={toggleMusic}
+          className="w-14 h-14 bg-[#5D4037] text-[#E6CEA0] rounded-full shadow-2xl border-4 border-white flex items-center justify-center animate-bounce hover:scale-110 transition-transform"
+        >
+          <span className="text-xl">{isPlaying ? "⏸️" : "▶️"}</span>
+        </button>
+      </div>
 
       <a 
         href="https://wa.me/628978720373" 

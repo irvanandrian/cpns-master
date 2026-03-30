@@ -9,6 +9,44 @@ export default function PembahasanPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // --- FITUR ANTI SCREENSHOT & ANTI COPY ---
+  useEffect(() => {
+    // 1. Cegah Klik Kanan
+    const preventRightClick = (e: MouseEvent) => e.preventDefault();
+    document.addEventListener('contextmenu', preventRightClick);
+
+    // 2. Cegah Shortcut Keyboard (Print, Copy, DevTools, Save)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cegah F12
+      if (e.key === "F12") e.preventDefault();
+      
+      // Cegah PrintScreen
+      if (e.key === "PrintScreen") {
+        navigator.clipboard.writeText("");
+        alert("Screenshot dilarang untuk melindungi hak cipta soal!");
+        e.preventDefault();
+      }
+
+      // Cegah Ctrl+C, Ctrl+S, Ctrl+P, Ctrl+Shift+I, Ctrl+Shift+S
+      if (e.ctrlKey && (e.key === 'c' || e.key === 's' || e.key === 'p' || (e.shiftKey && (e.key === 'I' || e.key === 'S')))) {
+        e.preventDefault();
+        return false;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    // 3. Bersihkan Clipboard secara berkala
+    const clearClipboard = setInterval(() => {
+      navigator.clipboard.writeText("Konten Dilindungi GaskeunNIP").catch(() => {});
+    }, 2000);
+
+    return () => {
+      document.removeEventListener('contextmenu', preventRightClick);
+      window.removeEventListener('keydown', handleKeyDown);
+      clearInterval(clearClipboard);
+    };
+  }, []);
+
   useEffect(() => {
     const bungkusanData = localStorage.getItem('terakhir_ujian');
     
@@ -40,7 +78,13 @@ export default function PembahasanPage() {
   // --- TAMPILAN SKOR ---
   if (view === 'skor') {
     return (
-      <div className="h-screen bg-[#FDFBF9] flex items-center justify-center p-6 text-center">
+      <div className="h-screen bg-[#FDFBF9] flex items-center justify-center p-6 text-center select-none">
+        {/* CSS PROTEKSI */}
+        <style jsx global>{`
+          @media print { body { display: none !important; } }
+          body { -webkit-user-select: none; user-select: none; }
+        `}</style>
+
         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-[#E6CEA0]/20 max-w-sm w-full relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-2 bg-[#5D4037]"></div>
           <h2 className="font-black text-[#5D4037] mb-4 uppercase text-[10px] tracking-[0.3em]">Hasil Skor</h2>
@@ -77,7 +121,13 @@ export default function PembahasanPage() {
 
   // --- TAMPILAN REVIEW PEMBAHASAN ---
   return (
-    <div className="min-h-screen bg-[#FDFBF9] text-[#42271E] pb-10">
+    <div className="min-h-screen bg-[#FDFBF9] text-[#42271E] pb-10 select-none">
+      {/* CSS PROTEKSI */}
+      <style jsx global>{`
+        @media print { body { display: none !important; } }
+        body { -webkit-user-select: none; user-select: none; }
+      `}</style>
+
       <div className="sticky top-0 bg-white border-b border-[#E6CEA0]/30 p-4 flex justify-between items-center z-50 shadow-sm">
         <button onClick={() => setView('skor')} className="text-[10px] font-black uppercase text-[#A67C52] hover:underline">← Kembali</button>
         <h2 className="font-black uppercase text-xs tracking-tighter text-[#5D4037]">Review: {data.dataReview.length} Soal</h2>
@@ -104,12 +154,23 @@ export default function PembahasanPage() {
             </div>
 
             {/* RENDER PERTANYAAN (LATEX) */}
-            <div className="font-bold text-sm mb-6 leading-relaxed text-[#5D4037] flex gap-2">
+            <div className="font-bold text-sm mb-4 leading-relaxed text-[#5D4037] flex gap-2">
               <span className="opacity-40 text-xs shrink-0">#{idx + 1}</span> 
               <div className="flex-1">
                 <RenderSoal content={item.pertanyaan} />
               </div>
             </div>
+
+            {/* TAMBAHAN: RENDER IMAGE_URL JIKA ADA */}
+            {item.image_url && (
+              <div className="mb-6 rounded-xl overflow-hidden border border-[#E6CEA0]/20 bg-[#FDFBF9] flex justify-center">
+                <img 
+                  src={item.image_url} 
+                  alt={`Gambar Soal ${idx + 1}`} 
+                  className="max-h-[300px] object-contain p-2"
+                />
+              </div>
+            )}
             
             {/* RENDER OPSI (LATEX) */}
             <div className="grid grid-cols-1 gap-2 mb-6">

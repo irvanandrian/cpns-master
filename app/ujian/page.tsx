@@ -28,7 +28,7 @@ function UjianContent() {
     isFinishedRef.current = isFinished;
   }, [isFinished]);
 
-  // --- FITUR ANTI CURANG ---
+  // --- FITUR ANTI CURANG & ANTI SCREENSHOT ---
   useEffect(() => {
     const handleViolation = () => {
       if (!isFinishedRef.current && !loading && soal.length > 0) {
@@ -36,16 +36,49 @@ function UjianContent() {
         if (hitungSkorRef.current) hitungSkorRef.current();
       }
     };
+
+    // 1. Deteksi Tab/Window Blur
     window.addEventListener('blur', handleViolation);
     const handleVisibilityChange = () => { if (document.visibilityState === 'hidden') handleViolation(); };
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // 2. Cegah Klik Kanan
     const preventRightClick = (e: MouseEvent) => e.preventDefault();
     document.addEventListener('contextmenu', preventRightClick);
+
+    // 3. Cegah Shortcut Keyboard (PrintScreen, Copy, DevTools, Save)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cegah F12
+      if (e.key === "F12") e.preventDefault();
+      
+      // Cegah PrintScreen (Hanya bekerja di beberapa browser/OS)
+      if (e.key === "PrintScreen") {
+        navigator.clipboard.writeText(""); // Bersihkan clipboard
+        alert("Screenshot dilarang!");
+        e.preventDefault();
+      }
+
+      // Cegah Ctrl+C (Copy), Ctrl+S (Save), Ctrl+P (Print), Ctrl+Shift+I (DevTools), Ctrl+Shift+S (Snippet)
+      if (e.ctrlKey && (e.key === 'c' || e.key === 's' || e.key === 'p' || (e.shiftKey && (e.key === 'I' || e.key === 'S')))) {
+        e.preventDefault();
+        return false;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    // 4. Clear Clipboard secara berkala (Opsional tapi membantu)
+    const clearClipboard = setInterval(() => {
+      if (!isFinishedRef.current) {
+        navigator.clipboard.writeText("Konten Dilindungi GaskeunNIP").catch(() => {});
+      }
+    }, 2000);
 
     return () => {
       window.removeEventListener('blur', handleViolation);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('contextmenu', preventRightClick);
+      window.removeEventListener('keydown', handleKeyDown);
+      clearInterval(clearClipboard);
     };
   }, [loading, soal.length]);
 
@@ -87,7 +120,7 @@ function UjianContent() {
     fetchSoal();
   }, [paketDipilih, jenisUjian, router]);
 
-  // --- LOGIKA HITUNG SKOR (PERBAIKAN: MENGGUNAKAN VARIABEL LOKAL UNTUK MENGHINDARI KEBOCORAN) ---
+  // --- LOGIKA HITUNG SKOR ---
   const hitungSkor = () => {
     if (isFinishedRef.current || soal.length === 0) return;
 
@@ -97,7 +130,6 @@ function UjianContent() {
 
     const poinStandarBenar = (jenisUjian === 'cpns' || jenisUjian === 'kedinasan') ? 5 : 1;
 
-    // Iterasi langsung dari soal yang sudah terfilter di state
     soal.forEach((item) => {
       const pilihanUser = jawabanUser[item.id] || null;
       const kat = item.kategori || "UMUM";
@@ -126,13 +158,11 @@ function UjianContent() {
       });
     });
 
-    // Update state secara kolektif
     setSkorKategori(recapKategori);
     setTotalSkor(totalSemua);
     setDataReview(reviewTemp);
     setIsFinished(true);
 
-    // --- SIMPAN KE LOCALSTORAGE (Menggunakan reviewTemp yang isinya sudah ter-filter) ---
     const hasilUjian = {
       totalSkor: totalSemua,
       skorKategori: recapKategori,
@@ -176,7 +206,6 @@ function UjianContent() {
     );
   }
 
-  // --- TAMPILAN SKOR ---
   if (isFinished) {
     return (
       <div className="h-screen bg-[#FDFBF9] flex items-center justify-center p-6 text-center">
@@ -204,7 +233,22 @@ function UjianContent() {
   const s = soal[indexSekarang];
 
   return (
-    <div className="min-h-screen bg-[#FDFBF9] text-[#42271E] font-sans pb-20">
+    <div className="min-h-screen bg-[#FDFBF9] text-[#42271E] font-sans pb-20 select-none">
+      {/* CSS ANTI PRINT */}
+      <style jsx global>{`
+        @media print {
+          body { display: none !important; }
+        }
+        body {
+          -webkit-touch-callout: none;
+          -webkit-user-select: none;
+          -khtml-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          user-select: none;
+        }
+      `}</style>
+
       <div className="bg-white border-b border-[#E6CEA0]/30 px-6 py-4 sticky top-0 z-30 flex justify-between items-center shadow-sm">
         <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[#A67C52]">SOAL {indexSekarang + 1} / {soal.length}</div>
         <div className="bg-[#5D4037] text-[#E6CEA0] px-4 py-1.5 rounded-xl font-mono font-black text-sm shadow-inner">{formatTime(timeLeft)}</div>
@@ -213,7 +257,7 @@ function UjianContent() {
       <div className="max-w-6xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
           <div className="bg-white p-8 rounded-[2.5rem] border border-[#E6CEA0]/20 shadow-sm mb-6 flex flex-col items-center gap-4">
-            {s?.image_url && <img src={s.image_url} alt="soal" className="max-h-60 object-contain rounded-xl border-2 border-[#FDFBF9] shadow-sm" />}
+            {s?.image_url && <img src={s.image_url} alt="soal" className="max-h-60 object-contain rounded-xl border-2 border-[#FDFBF9] shadow-sm pointer-events-none" />}
             <div className="text-sm md:text-base font-bold leading-relaxed text-left w-full">
               <RenderSoal content={s?.pertanyaan || ""} />
             </div>
