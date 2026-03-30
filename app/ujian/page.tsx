@@ -28,31 +28,40 @@ function UjianContent() {
     isFinishedRef.current = isFinished;
   }, [isFinished]);
 
-  // --- FITUR ANTI CURANG & ANTI SCREENSHOT ---
+  // --- FITUR ANTI CURANG & ANTI SCREENSHOT (DESKTOP & MOBILE) ---
   useEffect(() => {
     const handleViolation = () => {
       if (!isFinishedRef.current && !loading && soal.length > 0) {
-        alert("Peringatan: Anda meninggalkan halaman ujian. Ujian otomatis dihentikan.");
+        alert("Peringatan: Deteksi aktivitas mencurigakan atau perpindahan aplikasi. Ujian otomatis dihentikan demi keamanan konten.");
         if (hitungSkorRef.current) hitungSkorRef.current();
       }
     };
 
+    // Deteksi jika user pindah tab, buka panel notifikasi (awal screenshot mobile), atau tekan tombol home
     window.addEventListener('blur', handleViolation);
-    const handleVisibilityChange = () => { if (document.visibilityState === 'hidden') handleViolation(); };
+    
+    const handleVisibilityChange = () => { 
+      if (document.visibilityState === 'hidden') {
+        handleViolation();
+      }
+    };
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    const preventRightClick = (e: MouseEvent) => e.preventDefault();
-    document.addEventListener('contextmenu', preventRightClick);
+    // Cegah klik kanan & long-press di mobile
+    const preventContext = (e: MouseEvent | TouchEvent) => e.preventDefault();
+    document.addEventListener('contextmenu', preventContext);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "F12") e.preventDefault();
       
+      // Deteksi PrintScreen
       if (e.key === "PrintScreen") {
         navigator.clipboard.writeText(""); 
         alert("Screenshot dilarang!");
         e.preventDefault();
       }
 
+      // Deteksi Shortcut (Ctrl+C, S, P, Shift+I, Shift+S)
       if (e.ctrlKey && (e.key === 'c' || e.key === 's' || e.key === 'p' || (e.shiftKey && (e.key === 'I' || e.key === 'S')))) {
         e.preventDefault();
         return false;
@@ -60,6 +69,7 @@ function UjianContent() {
     };
     window.addEventListener('keydown', handleKeyDown);
 
+    // Pembersihan Clipboard berkala
     const clearClipboard = setInterval(() => {
       if (!isFinishedRef.current) {
         navigator.clipboard.writeText("Konten Dilindungi GaskeunNIP").catch(() => {});
@@ -69,7 +79,7 @@ function UjianContent() {
     return () => {
       window.removeEventListener('blur', handleViolation);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      document.removeEventListener('contextmenu', preventRightClick);
+      document.removeEventListener('contextmenu', preventContext);
       window.removeEventListener('keydown', handleKeyDown);
       clearInterval(clearClipboard);
     };
@@ -227,7 +237,18 @@ function UjianContent() {
     <div className="min-h-screen bg-[#FDFBF9] text-[#42271E] font-sans pb-20 select-none">
       <style jsx global>{`
         @media print { body { display: none !important; } }
-        body { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        body { 
+          -webkit-touch-callout: none; 
+          -webkit-user-select: none; 
+          user-select: none;
+          /* Mencegah zoom berlebih yang sering dipakai trik screenshot */
+          touch-action: pan-y; 
+        }
+        img {
+          /* Mencegah menu 'save image' muncul di mobile */
+          -webkit-touch-callout: none;
+          pointer-events: none;
+        }
       `}</style>
 
       <div className="bg-white border-b border-[#E6CEA0]/30 px-6 py-4 sticky top-0 z-30 flex justify-between items-center shadow-sm">
@@ -284,7 +305,6 @@ function UjianContent() {
               ))}
             </div>
             
-            {/* --- BAGIAN TOMBOL LANJUT & KUMPULKAN BERDAMPINGAN --- */}
             <div className="flex gap-2">
               {indexSekarang < soal.length - 1 && (
                 <button 
