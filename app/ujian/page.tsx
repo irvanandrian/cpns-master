@@ -37,28 +37,22 @@ function UjianContent() {
       }
     };
 
-    // 1. Deteksi Tab/Window Blur
     window.addEventListener('blur', handleViolation);
     const handleVisibilityChange = () => { if (document.visibilityState === 'hidden') handleViolation(); };
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    // 2. Cegah Klik Kanan
     const preventRightClick = (e: MouseEvent) => e.preventDefault();
     document.addEventListener('contextmenu', preventRightClick);
 
-    // 3. Cegah Shortcut Keyboard (PrintScreen, Copy, DevTools, Save)
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Cegah F12
       if (e.key === "F12") e.preventDefault();
       
-      // Cegah PrintScreen (Hanya bekerja di beberapa browser/OS)
       if (e.key === "PrintScreen") {
-        navigator.clipboard.writeText(""); // Bersihkan clipboard
+        navigator.clipboard.writeText(""); 
         alert("Screenshot dilarang!");
         e.preventDefault();
       }
 
-      // Cegah Ctrl+C (Copy), Ctrl+S (Save), Ctrl+P (Print), Ctrl+Shift+I (DevTools), Ctrl+Shift+S (Snippet)
       if (e.ctrlKey && (e.key === 'c' || e.key === 's' || e.key === 'p' || (e.shiftKey && (e.key === 'I' || e.key === 'S')))) {
         e.preventDefault();
         return false;
@@ -66,7 +60,6 @@ function UjianContent() {
     };
     window.addEventListener('keydown', handleKeyDown);
 
-    // 4. Clear Clipboard secara berkala (Opsional tapi membantu)
     const clearClipboard = setInterval(() => {
       if (!isFinishedRef.current) {
         navigator.clipboard.writeText("Konten Dilindungi GaskeunNIP").catch(() => {});
@@ -86,8 +79,6 @@ function UjianContent() {
   useEffect(() => {
     const fetchSoal = async () => {
       setLoading(true);
-
-      // --- TAMBAHAN: BERSIHKAN DATA LAMA SEBELUM MULAI ---
       localStorage.removeItem('terakhir_ujian');
 
       setSoal([]);
@@ -234,19 +225,9 @@ function UjianContent() {
 
   return (
     <div className="min-h-screen bg-[#FDFBF9] text-[#42271E] font-sans pb-20 select-none">
-      {/* CSS ANTI PRINT */}
       <style jsx global>{`
-        @media print {
-          body { display: none !important; }
-        }
-        body {
-          -webkit-touch-callout: none;
-          -webkit-user-select: none;
-          -khtml-user-select: none;
-          -moz-user-select: none;
-          -ms-user-select: none;
-          user-select: none;
-        }
+        @media print { body { display: none !important; } }
+        body { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
       `}</style>
 
       <div className="bg-white border-b border-[#E6CEA0]/30 px-6 py-4 sticky top-0 z-30 flex justify-between items-center shadow-sm">
@@ -268,8 +249,7 @@ function UjianContent() {
               <button
                 key={opt}
                 onClick={() => setJawabanUser({ ...jawabanUser, [s.id]: opt })}
-                className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left text-xs font-bold ${jawabanUser[s.id] === opt ? 'border-[#5D4037] bg-[#5D4037]/5 shadow-md' : 'border-white bg-white hover:border-[#E6CEA0]'
-                  }`}
+                className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left text-xs font-bold ${jawabanUser[s.id] === opt ? 'border-[#5D4037] bg-[#5D4037]/5 shadow-md' : 'border-white bg-white hover:border-[#E6CEA0]'}`}
               >
                 <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black ${jawabanUser[s.id] === opt ? 'bg-[#5D4037] text-white' : 'bg-[#FDFBF9] text-[#A67C52]'}`}>{opt.toUpperCase()}</span>
                 <div className="flex-1 text-left">
@@ -297,14 +277,30 @@ function UjianContent() {
                 <button
                   key={i}
                   onClick={() => setIndexSekarang(i)}
-                  className={`h-8 rounded-lg flex items-center justify-center text-[9px] font-black transition-all ${indexSekarang === i ? 'bg-[#5D4037] text-white ring-4 ring-[#5D4037]/10' : jawabanUser[item.id] ? 'bg-[#E6CEA0] text-[#5D4037]' : 'bg-[#FDFBF9] border border-[#E6CEA0]/30 text-[#A67C52]'
-                    }`}
+                  className={`h-8 rounded-lg flex items-center justify-center text-[9px] font-black transition-all ${indexSekarang === i ? 'bg-[#5D4037] text-white ring-4 ring-[#5D4037]/10' : jawabanUser[item.id] ? 'bg-[#E6CEA0] text-[#5D4037]' : 'bg-[#FDFBF9] border border-[#E6CEA0]/30 text-[#A67C52]'}`}
                 >
                   {i + 1}
                 </button>
               ))}
             </div>
-            <button onClick={() => { if (confirm("Sudah selesai mengerjakan semua?")) hitungSkor() }} className="w-full py-4 bg-[#A67C52] text-white rounded-2xl font-black text-[9px] uppercase tracking-widest shadow-lg shadow-[#A67C52]/20">Kumpulkan</button>
+            
+            {/* --- BAGIAN TOMBOL LANJUT & KUMPULKAN BERDAMPINGAN --- */}
+            <div className="flex gap-2">
+              {indexSekarang < soal.length - 1 && (
+                <button 
+                  onClick={() => setIndexSekarang(i => i + 1)} 
+                  className="flex-1 py-4 bg-[#FDFBF9] border border-[#A67C52]/30 text-[#A67C52] rounded-2xl font-black text-[9px] uppercase tracking-widest shadow-sm hover:bg-[#A67C52]/5 transition-all"
+                >
+                  Lanjut
+                </button>
+              )}
+              <button 
+                onClick={() => { if (confirm("Sudah selesai mengerjakan semua?")) hitungSkor() }} 
+                className={`py-4 bg-[#A67C52] text-white rounded-2xl font-black text-[9px] uppercase tracking-widest shadow-lg shadow-[#A67C52]/20 ${indexSekarang < soal.length - 1 ? 'flex-[1.5]' : 'w-full'}`}
+              >
+                Kumpulkan
+              </button>
+            </div>
           </div>
         </div>
       </div>
