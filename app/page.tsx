@@ -27,6 +27,53 @@ function FAQItem({ question, answer }: { question: string, answer: string }) {
   );
 }
 
+// --- KOMPONEN DASHBOARD PSIKOTES (MODAL/OVERLAY) ---
+function PsikotesDashboard({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-[#5D4037]/90 backdrop-blur-xl animate-in fade-in duration-300">
+      <div className="bg-[#FDFBF9] w-full max-w-4xl rounded-[3rem] overflow-hidden shadow-2xl relative">
+        <button onClick={onClose} className="absolute top-8 right-8 text-[#5D4037] font-black text-2xl hover:scale-125 transition-transform">✕</button>
+        
+        <div className="p-10 md:p-16">
+          <h2 className="text-[10px] font-black text-[#A67C52] uppercase tracking-[0.5em] mb-4">Pusat Latihan</h2>
+          <h3 className="text-4xl font-black text-[#5D4037] uppercase tracking-tighter mb-10">Pilih Mode Psikotes</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* CARD TES KORAN */}
+            <Link href="/tes-koran" className="group">
+              <div className="bg-white border-2 border-[#5D4037]/5 p-8 rounded-[2.5rem] hover:border-[#E6CEA0] hover:shadow-xl transition-all h-full flex flex-col justify-between">
+                <div>
+                  <div className="text-4xl mb-4">✍️</div>
+                  <h4 className="font-black text-xl uppercase text-[#5D4037] mb-2">Tes Koran</h4>
+                  <p className="text-[10px] font-bold text-[#5D4037]/60 uppercase leading-relaxed">
+                    Uji ketahanan, stabilitas, dan kecepatan berhitung dengan mode Pauli & Kraepelin.
+                  </p>
+                </div>
+                <div className="mt-6 text-[10px] font-black text-[#A67C52] uppercase group-hover:translate-x-2 transition-transform">Mulai Latihan →</div>
+              </div>
+            </Link>
+
+            {/* CARD TES KECERMATAN */}
+            <Link href="/tes-kecermatan" className="group">
+              <div className="bg-white border-2 border-[#5D4037]/5 p-8 rounded-[2.5rem] hover:border-[#E6CEA0] hover:shadow-xl transition-all h-full flex flex-col justify-between">
+                <div>
+                  <div className="text-4xl mb-4">🔍</div>
+                  <h4 className="font-black text-xl uppercase text-[#5D4037] mb-2">Tes Kecermatan</h4>
+                  <p className="text-[10px] font-bold text-[#5D4037]/60 uppercase leading-relaxed">
+                    Latih ketelitian visual untuk mencari angka, huruf, atau simbol yang hilang secara cepat.
+                  </p>
+                </div>
+                <div className="mt-6 text-[10px] font-black text-[#A67C52] uppercase group-hover:translate-x-2 transition-transform">Mulai Latihan →</div>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [statusSoal, setStatusSoal] = useState({
     cpns: false,
@@ -36,6 +83,7 @@ export default function Home() {
   });
   
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showPsikotes, setShowPsikotes] = useState(false); // State baru untuk dashboard
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // --- FITUR AUTO-PLAY PADA KLIK PERTAMA ---
@@ -114,6 +162,9 @@ export default function Home() {
       
       <audio ref={audioRef} src="/Pompeii.mp3" loop />
 
+      {/* DASHBOARD PSIKOTES MODAL */}
+      <PsikotesDashboard isOpen={showPsikotes} onClose={() => setShowPsikotes(false)} />
+
       {/* NAVBAR */}
       <nav className="fixed top-0 left-0 right-0 bg-[#5D4037]/95 backdrop-blur-md z-50 shadow-lg px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -122,10 +173,15 @@ export default function Home() {
           </span>
           <div className="hidden md:flex items-center gap-8 text-[10px] font-black text-white/70 uppercase tracking-widest">
             <a href="#paket" className="hover:text-[#E6CEA0]">Pilihan Paket</a>
-            {/* TAMBAHAN NAVIGASI TES KORAN */}
-            <Link href="/tes-koran" className="text-[#E6CEA0] hover:text-white flex items-center gap-1">
-              <span className="animate-pulse">●</span> Tes Koran
-            </Link>
+            
+            {/* TAMBAHAN NAVIGASI PSIKOTES */}
+            <button 
+              onClick={() => setShowPsikotes(true)}
+              className="text-[#E6CEA0] hover:text-white flex items-center gap-1 transition-all"
+            >
+              <span className="animate-pulse">●</span> Psikotes
+            </button>
+
             <a href="#testimoni" className="hover:text-[#E6CEA0]">Testimoni</a>
             <a href="#faq" className="hover:text-[#E6CEA0]">FAQ</a>
           </div>
@@ -222,13 +278,14 @@ export default function Home() {
 
       {/* FLOATING BUTTONS */}
       <div className="fixed bottom-8 left-8 flex flex-col gap-3 z-[100]">
-        {/* BUTTON NAVIGASI TES KORAN FLOATING */}
-        <Link href="/tes-koran">
-          <button className="w-14 h-14 bg-[#E6CEA0] text-[#5D4037] rounded-full shadow-2xl border-4 border-white flex items-center justify-center hover:scale-110 transition-transform group relative">
-            <span className="text-xl">✍️</span>
-            <span className="absolute left-16 bg-[#5D4037] text-[#E6CEA0] px-3 py-1 rounded text-[8px] font-black uppercase whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Latihan Tes Koran</span>
-          </button>
-        </Link>
+        {/* BUTTON DASHBOARD PSIKOTES (Pengganti tombol koran lama) */}
+        <button 
+          onClick={() => setShowPsikotes(true)}
+          className="w-14 h-14 bg-[#E6CEA0] text-[#5D4037] rounded-full shadow-2xl border-4 border-white flex items-center justify-center hover:scale-110 transition-transform group relative"
+        >
+          <span className="text-xl">📊</span>
+          <span className="absolute left-16 bg-[#5D4037] text-[#E6CEA0] px-3 py-1 rounded text-[8px] font-black uppercase whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">Menu Psikotes</span>
+        </button>
         
         <button 
           onClick={toggleMusic}
