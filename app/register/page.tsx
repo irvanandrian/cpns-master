@@ -9,7 +9,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [password, setPassword] = useState("");
-  const [paket, setPaket] = useState(""); // Akan menyimpan: "cpns", "kedinasan", "bumn", atau "snbt"
+  const [paket, setPaket] = useState(""); // Akan menyimpan: "cpns", "kedinasan", "bumn", "snbt", atau "psikotes"
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -91,6 +91,7 @@ export default function RegisterPage() {
               <option value="kedinasan">KEDINASAN (Semua Paket)</option>
               <option value="bumn">BUMN (Semua Paket)</option>
               <option value="snbt">SNBT (Semua Paket)</option>
+              <option value="psikotes">PSIKOTES (Akses Penuh)</option>
             </select>
           </div>
 

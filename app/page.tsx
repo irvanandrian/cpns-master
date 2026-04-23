@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Link from 'next/link';
 import { supabase } from './lib/supabase'; 
+import { useRouter } from 'next/navigation'; // Tambahkan router untuk redirect
 
 // --- KOMPONEN FAQ (ACCORDION) ---
 function FAQItem({ question, answer }: { question: string, answer: string }) {
@@ -75,6 +76,7 @@ function PsikotesDashboard({ isOpen, onClose }: { isOpen: boolean, onClose: () =
 }
 
 export default function Home() {
+  const router = useRouter(); // Initialize router
   const [statusSoal, setStatusSoal] = useState({
     cpns: false,
     bumn: false,
@@ -83,10 +85,23 @@ export default function Home() {
   });
   
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showPsikotes, setShowPsikotes] = useState(false); // State baru untuk dashboard
+  const [showPsikotes, setShowPsikotes] = useState(false); 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // --- FITUR AUTO-PLAY PADA KLIK PERTAMA ---
+  // --- FUNGSI PROTEKSI AKSES PSIKOTES ---
+  const handleAccessPsikotes = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      // Jika sudah login, buka dashboard psikotes
+      setShowPsikotes(true);
+    } else {
+      // Jika belum login, arahkan ke register/login
+      alert("Silakan Daftar/Masuk akun terlebih dahulu untuk mengakses fitur Psikotes!");
+      router.push('/register');
+    }
+  };
+
   useEffect(() => {
     const handleFirstClick = () => {
       if (audioRef.current && !isPlaying) {
@@ -174,9 +189,9 @@ export default function Home() {
           <div className="hidden md:flex items-center gap-8 text-[10px] font-black text-white/70 uppercase tracking-widest">
             <a href="#paket" className="hover:text-[#E6CEA0]">Pilihan Paket</a>
             
-            {/* TAMBAHAN NAVIGASI PSIKOTES */}
+            {/* TAMBAHAN NAVIGASI PSIKOTES DENGAN PROTEKSI */}
             <button 
-              onClick={() => setShowPsikotes(true)}
+              onClick={handleAccessPsikotes}
               className="text-[#E6CEA0] hover:text-white flex items-center gap-1 transition-all"
             >
               <span className="animate-pulse">●</span> Psikotes
@@ -278,9 +293,9 @@ export default function Home() {
 
       {/* FLOATING BUTTONS */}
       <div className="fixed bottom-8 left-8 flex flex-col gap-3 z-[100]">
-        {/* BUTTON DASHBOARD PSIKOTES (Pengganti tombol koran lama) */}
+        {/* BUTTON DASHBOARD PSIKOTES DENGAN PROTEKSI */}
         <button 
-          onClick={() => setShowPsikotes(true)}
+          onClick={handleAccessPsikotes}
           className="w-14 h-14 bg-[#E6CEA0] text-[#5D4037] rounded-full shadow-2xl border-4 border-white flex items-center justify-center hover:scale-110 transition-transform group relative"
         >
           <span className="text-xl">📊</span>
