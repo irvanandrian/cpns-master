@@ -91,11 +91,11 @@ export default function Home() {
   };
 
   const paketHarga = [
-    { id: 'cpns', title: "Paket CPNS", harga: "40k", fitur: ["10x Try Out Full", "Pembahasan Teks", "Grup Belajar", "Akses Selamanya"] },
+    { id: 'cpns', title: "Paket CPNS", harga: "50k", fitur: ["10x Try Out Full", "Pembahasan Teks", "Grup Belajar", "Akses Selamanya"] },
     { id: 'psikotes', title: "Paket Psikotes", harga: "50k", fitur: ["Tes Koran (Pauli/Krae)", "Tes Kecermatan", "Grafik Statistik Kecepatan", "Latihan Tanpa Batas"] },
-    { id: 'bumn', title: "Paket BUMN ", harga: "45k", fitur: ["Materi AKHLAK", "TKD Standard FHCI", "Grup Sharing", "Update Soal Berkala"] },
-    { id: 'kedinasan', title: "Paket Sekolah Kedinasan", harga: "40k", fitur: ["Simulasi SKD Lengkap", "Bank Soal 5 Tahun", "Konsultasi Jurusan"] },
-    { id: 'snbt', title: "Paket SNBT", harga: "20k", fitur: ["Trik Cepat PK", "Penalaran Umum"] }
+    { id: 'bumn', title: "Paket BUMN ", harga: "50k", fitur: ["Materi AKHLAK", "TKD Standard FHCI", "Grup Sharing", "Update Soal Berkala"] },
+    { id: 'kedinasan', title: "Paket Sekolah Kedinasan", harga: "50k", fitur: ["Simulasi SKD Lengkap", "Bank Soal 5 Tahun", "Konsultasi Jurusan"] },
+    { id: 'snbt', title: "Paket SNBT", harga: "30k", fitur: ["Trik Cepat PK", "Penalaran Umum"] }
   ];
 
   const testimoniData = [
