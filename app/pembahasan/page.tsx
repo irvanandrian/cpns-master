@@ -11,23 +11,18 @@ export default function PembahasanPage() {
 
   // --- FITUR ANTI SCREENSHOT & ANTI COPY ---
   useEffect(() => {
-    // 1. Cegah Klik Kanan
     const preventRightClick = (e: MouseEvent) => e.preventDefault();
     document.addEventListener('contextmenu', preventRightClick);
 
-    // 2. Cegah Shortcut Keyboard (Print, Copy, DevTools, Save)
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Cegah F12
       if (e.key === "F12") e.preventDefault();
       
-      // Cegah PrintScreen
       if (e.key === "PrintScreen") {
         navigator.clipboard.writeText("");
         alert("Screenshot dilarang untuk melindungi hak cipta soal!");
         e.preventDefault();
       }
 
-      // Cegah Ctrl+C, Ctrl+S, Ctrl+P, Ctrl+Shift+I, Ctrl+Shift+S
       if (e.ctrlKey && (e.key === 'c' || e.key === 's' || e.key === 'p' || (e.shiftKey && (e.key === 'I' || e.key === 'S')))) {
         e.preventDefault();
         return false;
@@ -35,7 +30,6 @@ export default function PembahasanPage() {
     };
     window.addEventListener('keydown', handleKeyDown);
 
-    // 3. Bersihkan Clipboard secara berkala
     const clearClipboard = setInterval(() => {
       navigator.clipboard.writeText("Konten Dilindungi GaskeunNIP").catch(() => {});
     }, 2000);
@@ -79,7 +73,6 @@ export default function PembahasanPage() {
   if (view === 'skor') {
     return (
       <div className="h-screen bg-[#FDFBF9] flex items-center justify-center p-6 text-center select-none">
-        {/* CSS PROTEKSI */}
         <style jsx global>{`
           @media print { body { display: none !important; } }
           body { -webkit-user-select: none; user-select: none; }
@@ -122,7 +115,6 @@ export default function PembahasanPage() {
   // --- TAMPILAN REVIEW PEMBAHASAN ---
   return (
     <div className="min-h-screen bg-[#FDFBF9] text-[#42271E] pb-10 select-none">
-      {/* CSS PROTEKSI */}
       <style jsx global>{`
         @media print { body { display: none !important; } }
         body { -webkit-user-select: none; user-select: none; }
@@ -144,8 +136,8 @@ export default function PembahasanPage() {
                  {item.kategori}
                </span>
                <div className="flex gap-2">
-                 <span className="text-[9px] font-black px-3 py-1 rounded-full bg-gray-100">
-                   ANDA: {item.jawabanUser?.toUpperCase() || "-"}
+                 <span className={`text-[9px] font-black px-3 py-1 rounded-full ${!item.jawabanUser ? 'bg-gray-100' : item.jawabanUser === item.kunci ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                   ANDA: {item.jawabanUser?.toUpperCase() || "KOSONG"}
                  </span>
                  <span className="text-[9px] font-black px-3 py-1 rounded-full bg-[#5D4037] text-white">
                    POIN: {item.poinDidapat}
@@ -153,7 +145,6 @@ export default function PembahasanPage() {
                </div>
             </div>
 
-            {/* RENDER PERTANYAAN (LATEX) */}
             <div className="font-bold text-sm mb-4 leading-relaxed text-[#5D4037] flex gap-2">
               <span className="opacity-40 text-xs shrink-0">#{idx + 1}</span> 
               <div className="flex-1">
@@ -161,7 +152,6 @@ export default function PembahasanPage() {
               </div>
             </div>
 
-            {/* TAMBAHAN: RENDER IMAGE_URL JIKA ADA */}
             {item.image_url && (
               <div className="mb-6 rounded-xl overflow-hidden border border-[#E6CEA0]/20 bg-[#FDFBF9] flex justify-center">
                 <img 
@@ -172,29 +162,46 @@ export default function PembahasanPage() {
               </div>
             )}
             
-            {/* RENDER OPSI (LATEX) */}
+            {/* --- LOGIKA PERBANDINGAN JAWABAN --- */}
             <div className="grid grid-cols-1 gap-2 mb-6">
-               {['a','b','c','d','e'].map((opt) => (
-                 <div 
-                   key={opt} 
-                   className={`p-4 rounded-xl text-[11px] font-bold border ${
-                     item.jawabanUser === opt ? 'border-[#5D4037] bg-[#5D4037]/5' : 'border-gray-50 bg-gray-50/30'
-                   }`}
-                 >
-                   <div className="flex justify-between items-center gap-4">
-                     <div className="flex items-start gap-2">
-                        <span className="uppercase opacity-30 shrink-0">{opt}.</span> 
-                        <RenderSoal content={item[`opsi_${opt}`]} />
+               {['a','b','c','d','e'].map((opt) => {
+                 const isUserChoice = item.jawabanUser === opt;
+                 const isCorrectKey = item.kunci === opt;
+                 
+                 // Logika warna border dan background
+                 let statusClasses = "border-gray-50 bg-gray-50/30"; // Default
+                 if (isCorrectKey) statusClasses = "border-green-500 bg-green-50/50"; // Highlight Kunci
+                 else if (isUserChoice && !isCorrectKey) statusClasses = "border-red-500 bg-red-50/50"; // Highlight Salah
+
+                 return (
+                   <div 
+                     key={opt} 
+                     className={`p-4 rounded-xl text-[11px] font-bold border transition-colors ${statusClasses}`}
+                   >
+                     <div className="flex justify-between items-center gap-4">
+                       <div className="flex items-start gap-2">
+                          <span className={`uppercase shrink-0 ${isUserChoice ? 'opacity-100' : 'opacity-30'}`}>{opt}.</span> 
+                          <RenderSoal content={item[`opsi_${opt}`]} />
+                       </div>
+                       
+                       <div className="flex flex-col gap-1 items-end shrink-0">
+                         {isCorrectKey && (
+                           <span className="text-[7px] bg-green-500 text-white px-2 py-0.5 rounded font-black uppercase">
+                             Kunci Jawaban
+                           </span>
+                         )}
+                         {isUserChoice && (
+                           <span className={`text-[7px] px-2 py-0.5 rounded font-black uppercase ${isCorrectKey ? 'bg-[#5D4037] text-white' : 'bg-red-500 text-white'}`}>
+                             Jawaban Anda
+                           </span>
+                         )}
+                       </div>
                      </div>
-                     {item.kunci === opt && (
-                       <span className="text-[8px] bg-green-500 text-white px-2 py-0.5 rounded font-black uppercase shrink-0">Kunci</span>
-                     )}
                    </div>
-                 </div>
-               ))}
+                 );
+               })}
             </div>
 
-            {/* RENDER PEMBAHASAN (LATEX) */}
             <div className="p-5 bg-[#FDFBF9] rounded-2xl border border-[#E6CEA0]/20">
               <p className="text-[10px] font-black text-[#A67C52] uppercase mb-2">Pembahasan:</p>
               <div className="text-xs text-[#5D4037] italic leading-relaxed">

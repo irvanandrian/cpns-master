@@ -1,90 +1,85 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
-// Konfigurasi Pool Karakter
 const POOLS = {
   HURUF: "ABCDEFGHJKLMNPQRSTUVWXYZ",
   ANGKA: "0123456789",
-  // Mengganti simbol umum dengan karakter alfabet Yunani
-  SIMBOL: "ΩΓβθΔΣΦΨπλΞ" 
+  SIMBOL: "ΩΓβθΔΣΦΨπλΞ",
+  ROMAWI: "IVXLCDM"
 };
 
-type TestType = 'HURUF' | 'ANGKA' | 'SIMBOL' | null;
+type TestType = 'HURUF' | 'ANGKA' | 'SIMBOL' | 'ROMAWI' | null;
+
+interface Score {
+  correct: number;
+  wrong: number;
+}
 
 export default function TesKecermatanPage() {
   const router = useRouter();
   
-  // --- STATES ---
   const [testType, setTestType] = useState<TestType>(null);
   const [currentColumn, setCurrentColumn] = useState(1);
-  const [masterKeys, setMasterKeys] = useState<{ id: string, chars: string[] }[]>([]);
-  const [questions, setQuestions] = useState<string[]>([]);
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, { isCorrect: boolean }>>({});
+  const [masterKey, setMasterKey] = useState<string[]>([]);
+  const [currentQuestion, setCurrentQuestion] = useState<string[]>([]);
+  const [correctAnswer, setCorrectAnswer] = useState("");
+  const [score, setScore] = useState<Score>({ correct: 0, wrong: 0 });
   const [timeLeft, setTimeLeft] = useState(60);
   const [isStarted, setIsStarted] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
 
-  // --- LOGIKA GENERATE KUNCI & SOAL ---
-  const generateNewColumnData = (selectedType: TestType) => {
+  const generateQuestion = useCallback((selectedType: TestType) => {
     if (!selectedType) return;
-    
     const pool = POOLS[selectedType].split('');
-    
-    const newKeys = ['A', 'B', 'C', 'D', 'E'].map((id) => {
-      const shuffled = [...pool].sort(() => Math.random() - 0.5);
-      return {
-        id,
-        chars: shuffled.slice(0, 5)
-      };
-    });
+    const shuffledPool = [...pool].sort(() => Math.random() - 0.5);
+    const selectedMaster = shuffledPool.slice(0, 5);
+    setMasterKey(selectedMaster);
 
-    const newQuestions = Array.from({ length: 100 }, () => {
-      const randomKey = newKeys[Math.floor(Math.random() * newKeys.length)];
-      return [...randomKey.chars].sort(() => Math.random() - 0.5).join('');
-    });
+    const randomIndex = Math.floor(Math.random() * 5);
+    const missingChar = selectedMaster[randomIndex];
+    setCorrectAnswer(['A', 'B', 'C', 'D', 'E'][randomIndex]);
 
-    setMasterKeys(newKeys);
-    setQuestions(newQuestions);
-    setCurrentIdx(0);
-    setTimeLeft(60);
+    const questionChars = selectedMaster.filter(char => char !== missingChar);
+    setCurrentQuestion([...questionChars].sort(() => Math.random() - 0.5));
+  }, []);
+
+  const handleNextColumn = useCallback(() => {
+    if (currentColumn < 20) { // Berubah jadi 20 kolom
+      setCurrentColumn(prev => prev + 1);
+      generateQuestion(testType);
+      setTimeLeft(60);
+    } else {
+      setIsFinished(true);
+    }
+  }, [currentColumn, testType, generateQuestion]);
+
+  const handleManualFinish = () => {
+    if (confirm("Apakah Anda yakin ingin mengakhiri tes sekarang? Skor Anda akan langsung disimpan.")) {
+      setIsFinished(true);
+    }
   };
 
-  // --- EFFECT: TIMER ---
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isStarted && !isFinished) {
       if (timeLeft <= 0) {
-        if (currentColumn < 10) {
-          setCurrentColumn(prev => prev + 1);
-          generateNewColumnData(testType);
-        } else {
-          setIsFinished(true);
-        }
+        handleNextColumn();
       } else {
         timer = setInterval(() => setTimeLeft(t => t - 1), 1000);
       }
     }
     return () => clearInterval(timer);
-  }, [isStarted, timeLeft, currentColumn, isFinished, testType]);
+  }, [isStarted, timeLeft, isFinished, handleNextColumn]);
 
-  // --- LOGIKA JAWAB ---
   const handleAnswer = (choiceId: string) => {
     if (isFinished || !isStarted) return;
-
-    const currentChars = questions[currentIdx].split('').sort().join('');
-    const selectedKeyChars = masterKeys.find(k => k.id === choiceId)?.chars.sort().join('');
-    const isCorrect = currentChars === selectedKeyChars;
-
-    setAnswers(prev => ({
-      ...prev,
-      [`${currentColumn}_${currentIdx}`]: { isCorrect }
-    }));
-
-    if (currentIdx < questions.length - 1) {
-      setCurrentIdx(prev => prev + 1);
+    if (choiceId === correctAnswer) {
+      setScore(prev => ({ ...prev, correct: prev.correct + 1 }));
+    } else {
+      setScore(prev => ({ ...prev, wrong: prev.wrong + 1 }));
     }
+    generateQuestion(testType);
   };
 
   useEffect(() => {
@@ -94,29 +89,34 @@ export default function TesKecermatanPage() {
     };
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentIdx, masterKeys, isStarted]);
+  }, [correctAnswer, isStarted]);
 
-  // --- 1. TAMPILAN PEMILIHAN MENU ---
+  // --- UI: PEMILIHAN MENU ---
   if (!testType) {
     return (
       <div className="min-h-screen bg-[#FDFBF9] flex flex-col items-center justify-center p-6 text-[#5D4037]">
-        <h1 className="text-4xl font-black uppercase mb-2 tracking-tighter">Mode Kecermatan</h1>
-        <p className="text-[10px] font-black uppercase opacity-40 tracking-[0.3em] mb-12">Pilih kategori latihan kamu</p>
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-black tracking-tighter mb-2 italic uppercase">Kecermatan Polri</h1>
+          <div className="h-1 w-20 bg-[#A67C52] mx-auto rounded-full"></div>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
           {[
-            { id: 'HURUF', icon: 'Az', desc: 'Latihan Huruf Hilang' },
-            { id: 'ANGKA', icon: '12', desc: 'Latihan Angka Hilang' },
-            { id: 'SIMBOL', icon: 'Ωθ', desc: 'Latihan Simbol Hilang' }
+            { id: 'ANGKA', icon: '12', label: 'Angka Hilang' },
+            { id: 'HURUF', icon: 'Az', label: 'Huruf Hilang' },
+            { id: 'SIMBOL', icon: 'Ωθ', label: 'Simbol/Alpha' },
+            { id: 'ROMAWI', icon: 'VI', label: 'Angka Romawi' }
           ].map((item) => (
             <button
               key={item.id}
               onClick={() => setTestType(item.id as TestType)}
-              className="bg-white border-2 border-[#5D4037]/5 p-10 rounded-[3rem] shadow-sm hover:shadow-2xl hover:border-[#E6CEA0] transition-all group"
+              className="bg-white border-2 border-[#5D4037]/5 p-10 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:border-[#A67C52] transition-all group flex items-center gap-6"
             >
-              <div className="text-4xl font-black mb-4 group-hover:scale-110 transition-transform">{item.icon}</div>
-              <div className="font-black text-sm uppercase mb-2">{item.id}</div>
-              <div className="text-[9px] font-bold opacity-40 uppercase tracking-widest">{item.desc}</div>
+              <div className="text-4xl bg-[#FDFBF9] p-4 rounded-3xl group-hover:bg-[#A67C52] group-hover:text-white transition-colors">{item.icon}</div>
+              <div className="text-left">
+                <div className="font-black text-xl uppercase tracking-tight">{item.label}</div>
+                <div className="text-[10px] font-bold opacity-40 uppercase tracking-widest mt-1">20 Kolom x 60 Detik</div>
+              </div>
             </button>
           ))}
         </div>
@@ -124,20 +124,19 @@ export default function TesKecermatanPage() {
     );
   }
 
-  // --- 2. TAMPILAN START (INSTRUKSI) ---
+  // --- UI: START (INSTRUKSI) ---
   if (!isStarted) {
     return (
-      <div className="min-h-screen bg-[#FDFBF9] flex flex-col items-center justify-center p-6 text-[#5D4037]">
-        <div className="bg-white p-12 rounded-[3.5rem] border-2 border-[#5D4037]/5 shadow-xl text-center max-w-md w-full">
-          <div className="bg-[#E6CEA0] w-16 h-16 rounded-3xl flex items-center justify-center text-2xl mb-8 mx-auto shadow-inner">
-             {testType === 'HURUF' ? 'A' : testType === 'ANGKA' ? '1' : 'Ω'}
-          </div>
-          <h2 className="text-2xl font-black uppercase mb-2 tracking-tight">Siap Mulai?</h2>
-          <p className="text-[10px] font-black text-[#A67C52] uppercase tracking-widest mb-6">Mode: {testType}</p>
-          <p className="text-xs font-bold leading-relaxed opacity-60 mb-8 uppercase">10 Kolom x 60 Detik<br/>Fokus pada kecermatan visual anda.</p>
+      <div className="min-h-screen bg-[#FDFBF9] flex items-center justify-center p-6">
+        <div className="bg-white p-12 rounded-[3.5rem] text-center max-w-md w-full shadow-2xl border border-[#5D4037]/5">
+          <div className="w-20 h-20 bg-[#FDFBF9] rounded-full flex items-center justify-center text-4xl mb-8 mx-auto shadow-inner">🎯</div>
+          <h2 className="text-2xl font-black text-[#5D4037] uppercase mb-4 tracking-tight">Aturan Main</h2>
+          <p className="text-gray-500 text-sm font-medium leading-relaxed mb-10">
+            Temukan karakter yang ada di <span className="text-[#A67C52] font-bold">Baris Atas</span> tetapi menghilang di <span className="text-[#A67C52] font-bold">Kotak Tengah</span>.
+          </p>
           <button 
-            onClick={() => { setIsStarted(true); generateNewColumnData(testType); }}
-            className="w-full bg-[#5D4037] text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg"
+            onClick={() => { setIsStarted(true); generateQuestion(testType); }}
+            className="w-full bg-[#5D4037] text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-[#A67C52] transition-all shadow-lg shadow-[#5D4037]/20"
           >
             Mulai Sekarang
           </button>
@@ -146,91 +145,109 @@ export default function TesKecermatanPage() {
     );
   }
 
-  // --- 3. TAMPILAN FINISH ---
+  // --- UI: HASIL AKHIR ---
   if (isFinished) {
-    const totalCorrect = Object.values(answers).filter(a => a.isCorrect).length;
+    const totalInput = score.correct + score.wrong;
+    const accuracy = totalInput > 0 ? Math.round((score.correct / totalInput) * 100) : 0;
+    
     return (
-      <div className="h-screen bg-[#FDFBF9] flex items-center justify-center p-6 text-[#5D4037]">
-        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-[#E6CEA0]/20 max-w-sm w-full text-center">
-          <h2 className="font-black mb-2 uppercase text-[10px] tracking-[0.3em]">Hasil Latihan {testType}</h2>
-          <div className="text-6xl font-black text-[#A67C52] mb-2">{totalCorrect}</div>
-          <p className="text-[10px] font-bold uppercase mb-8 opacity-50">Total Jawaban Benar</p>
-          <button onClick={() => window.location.reload()} className="w-full bg-[#5D4037] text-white py-4 rounded-2xl font-black text-[10px] mb-3 uppercase shadow-lg">Ganti Menu</button>
-          <button onClick={() => router.push('/')} className="w-full border-2 border-[#5D4037]/10 py-4 rounded-2xl font-black text-[10px] uppercase">Menu Utama</button>
+      <div className="min-h-screen bg-[#FDFBF9] flex items-center justify-center p-6">
+        <div className="bg-white p-12 rounded-[4rem] shadow-2xl max-w-md w-full text-center border-2 border-[#5D4037]/5">
+          <h2 className="font-black text-[#5D4037] text-2xl uppercase mb-10 tracking-tight">Evaluasi Tes</h2>
+          
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="bg-[#FDFBF9] p-8 rounded-3xl border border-[#5D4037]/5">
+              <div className="text-4xl font-black text-[#A67C52]">{score.correct}</div>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Benar</div>
+            </div>
+            <div className="bg-[#FDFBF9] p-8 rounded-3xl border border-[#5D4037]/5">
+              <div className="text-4xl font-black text-red-400">{score.wrong}</div>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Salah</div>
+            </div>
+          </div>
+
+          <div className="bg-[#5D4037] text-white p-6 rounded-3xl mb-10">
+            <div className="text-sm font-bold opacity-60 uppercase tracking-[0.2em] mb-1">Akurasi</div>
+            <div className="text-3xl font-black">{accuracy}%</div>
+          </div>
+
+          <button onClick={() => window.location.reload()} className="w-full bg-[#5D4037] text-white py-5 rounded-2xl font-black uppercase mb-3 shadow-lg">Ulangi Tes</button>
+          <button onClick={() => router.push('/')} className="w-full py-5 rounded-2xl font-black uppercase text-gray-300 hover:text-[#5D4037] transition-colors">Keluar</button>
         </div>
       </div>
     );
   }
 
-  // --- 4. TAMPILAN UTAMA TES ---
+  // --- UI: UTAMA TES ---
   return (
-    <div className="min-h-screen bg-[#FDFBF9] text-[#5D4037] flex flex-col items-center p-4 select-none animate-in fade-in duration-500 relative">
+    <div className="min-h-screen bg-[#FDFBF9] text-[#5D4037] flex flex-col items-center p-6 select-none relative">
       
-      {/* Tombol Selesai (Pojok Kanan Atas) */}
+      {/* Tombol Selesai */}
       <button 
-        onClick={() => {
-          if(confirm("Apakah Anda yakin ingin mengakhiri sesi latihan ini lebih awal?")) {
-            setIsFinished(true);
-          }
-        }}
-        className="absolute top-6 right-6 px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-sm z-50"
+        onClick={handleManualFinish}
+        className="absolute top-8 right-8 px-6 py-2 bg-white border-2 border-red-100 text-red-500 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all shadow-sm"
       >
-        Selesai
+        Selesai Manual
       </button>
 
-      {/* Header & Status */}
-      <div className="w-full max-w-xl flex justify-between items-center mt-12 mb-6 bg-white p-4 rounded-2xl shadow-sm border border-[#E6CEA0]/30">
-        <div className="flex flex-col">
-          <span className="text-[8px] font-black uppercase opacity-40 tracking-widest">Kolom</span>
-          <span className="font-black text-sm uppercase text-[#A67C52]">{currentColumn} / 10</span>
-        </div>
-        
-        <div className={`px-6 py-2 rounded-xl font-mono font-black text-xl shadow-inner ${timeLeft <= 10 ? 'bg-red-500 text-white animate-pulse' : 'bg-[#FDFBF9] border border-[#5D4037]/10'}`}>
-          00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
+      {/* Header Statis */}
+      <div className="w-full max-w-2xl flex justify-between items-end mt-12 mb-10 px-4">
+        <div>
+          <p className="text-[10px] font-black text-[#A67C52] uppercase tracking-[0.3em] mb-1">Kemajuan</p>
+          <p className="text-2xl font-black">Kolom {currentColumn}<span className="text-gray-200">/20</span></p>
         </div>
 
-        <div className="flex flex-col items-end text-right">
-          <span className="text-[8px] font-black uppercase opacity-40 tracking-widest">Mode</span>
-          <span className="font-black text-sm uppercase text-[#5D4037]">{testType}</span>
+        <div className={`px-10 py-4 rounded-[2rem] font-mono font-black text-3xl shadow-xl border-4 ${timeLeft <= 10 ? 'bg-red-500 text-white border-red-400 animate-pulse' : 'bg-white text-[#5D4037] border-[#FDFBF9]'}`}>
+          {timeLeft}s
+        </div>
+
+        <div className="text-right">
+          <p className="text-[10px] font-black text-[#A67C52] uppercase tracking-[0.3em] mb-1">Poin</p>
+          <p className="text-2xl font-black">{score.correct}</p>
         </div>
       </div>
 
-      {/* Tabel Kunci */}
-      <div className="grid grid-cols-5 gap-2 w-full max-w-xl mb-8">
-        {masterKeys.map((item) => (
-          <div key={item.id} className="bg-white border-2 border-[#5D4037]/10 rounded-xl overflow-hidden shadow-sm">
-            <div className="bg-[#5D4037] text-white text-center py-1 font-black text-sm">{item.id}</div>
-            <div className="flex flex-col items-center py-3 gap-1">
-              {item.chars.map((char, i) => (
-                <span key={i} className="font-bold text-sm tracking-tighter">{char}</span>
-              ))}
+      {/* Master Key Cards */}
+      <div className="grid grid-cols-5 gap-3 w-full max-w-2xl mb-12">
+        {masterKey.map((char, idx) => (
+          <div key={idx} className="flex flex-col gap-2">
+            <div className="bg-white aspect-[3/4] rounded-3xl flex items-center justify-center text-4xl md:text-5xl font-black shadow-lg border border-[#5D4037]/5">
+              {char}
+            </div>
+            <div className="bg-[#A67C52] text-white text-center rounded-full py-1 text-[12px] font-black shadow-sm mx-4">
+              {['A', 'B', 'C', 'D', 'E'][idx]}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Kotak Soal */}
-      <div className="w-full max-w-md bg-white border-4 border-[#5D4037] rounded-[2.5rem] p-12 mb-8 text-center shadow-xl relative">
-        <span className="text-4xl md:text-5xl font-black tracking-[0.3em] pl-[0.3em]">
-          {questions[currentIdx]}
-        </span>
+      {/* Box Soal Tengah */}
+      <div className="w-full max-w-md bg-white border-8 border-[#FDFBF9] rounded-[3.5rem] p-12 mb-12 text-center shadow-2xl relative group">
+        <div className="absolute inset-0 bg-[#A67C52]/5 rounded-[3rem] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div className="flex justify-center gap-6">
+          {currentQuestion.map((char, idx) => (
+            <span key={idx} className="text-4xl md:text-5xl font-black tracking-tighter text-[#5D4037]">
+              {char}
+            </span>
+          ))}
+        </div>
       </div>
 
-      {/* Input Jawaban */}
-      <div className="grid grid-cols-5 gap-4 w-full max-w-xl">
+      {/* Answer Grid */}
+      <div className="grid grid-cols-5 gap-4 w-full max-w-2xl">
         {['A', 'B', 'C', 'D', 'E'].map((letter) => (
           <button
             key={letter}
             onClick={() => handleAnswer(letter)}
-            className="aspect-square bg-white border-2 border-[#5D4037]/20 rounded-2xl flex items-center justify-center text-2xl font-black hover:bg-[#5D4037] hover:text-white transition-all active:scale-90 shadow-sm"
+            className="aspect-square bg-white border-2 border-[#5D4037]/5 rounded-[2rem] flex items-center justify-center text-2xl font-black hover:bg-[#5D4037] hover:text-white hover:scale-105 transition-all active:scale-95 shadow-md group"
           >
-            {letter}
+            <span className="group-hover:animate-bounce">{letter}</span>
           </button>
         ))}
       </div>
 
-      <div className="mt-8 flex gap-4 opacity-20 italic font-bold text-[9px] uppercase tracking-widest">
-        <span>Gunakan Keyboard A-E untuk kecepatan</span>
+      <div className="mt-12 flex gap-4 opacity-30 italic font-bold text-[9px] uppercase tracking-[0.4em]">
+        Gunakan Shortcut Keyboard A-E
       </div>
     </div>
   );
