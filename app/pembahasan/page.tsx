@@ -84,12 +84,12 @@ export default function PembahasanPage() {
           <div className="text-6xl font-black text-[#A67C52] mb-8 tracking-tighter">{data.totalSkor}</div>
           
           <div className="grid grid-cols-2 gap-2 mb-8 text-[8px] font-black uppercase text-left">
-             {data.skorKategori && Object.keys(data.skorKategori).map((kat) => (
-               <div key={kat} className="bg-[#FDFBF9] p-2 rounded-lg border border-[#E6CEA0]/20">
-                 <div className="text-[#A67C52]">{kat}</div>
-                 <div className="text-sm font-black text-[#5D4037]">{data.skorKategori[kat]}</div>
-               </div>
-             ))}
+              {data.skorKategori && Object.keys(data.skorKategori).map((kat) => (
+                <div key={kat} className="bg-[#FDFBF9] p-2 rounded-lg border border-[#E6CEA0]/20">
+                  <div className="text-[#A67C52]">{kat}</div>
+                  <div className="text-sm font-black text-[#5D4037]">{data.skorKategori[kat]}</div>
+                </div>
+              ))}
           </div>
 
           <button 
@@ -136,9 +136,16 @@ export default function PembahasanPage() {
                  {item.kategori}
                </span>
                <div className="flex gap-2">
-                 <span className={`text-[9px] font-black px-3 py-1 rounded-full ${!item.jawabanUser ? 'bg-gray-100' : item.jawabanUser === item.kunci ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                 {/* JAWABAN USER */}
+                 <span className={`text-[9px] font-black px-3 py-1 rounded-full ${!item.jawabanUser ? 'bg-gray-100' : item.jawabanUser.toLowerCase().trim() === item.kunci.toLowerCase().trim() ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                    ANDA: {item.jawabanUser?.toUpperCase() || "KOSONG"}
                  </span>
+                 
+                 {/* KUNCI JAWABAN */}
+                 <span className="text-[9px] font-black px-3 py-1 rounded-full bg-green-500 text-white uppercase shadow-sm">
+                   KUNCI: {item.kunci?.toUpperCase()}
+                 </span>
+
                  <span className="text-[9px] font-black px-3 py-1 rounded-full bg-[#5D4037] text-white">
                    POIN: {item.poinDidapat}
                  </span>
@@ -165,34 +172,38 @@ export default function PembahasanPage() {
             {/* --- LOGIKA PERBANDINGAN JAWABAN --- */}
             <div className="grid grid-cols-1 gap-2 mb-6">
                {['a','b','c','d','e'].map((opt) => {
-                 const isUserChoice = item.jawabanUser === opt;
-                 const isCorrectKey = item.kunci === opt;
+                 // Normalisasi pengecekan (huruf kecil & hapus spasi)
+                 const currentOpt = opt.toLowerCase().trim();
+                 const userAns = item.jawabanUser?.toLowerCase().trim();
+                 const correctAns = item.kunci?.toLowerCase().trim();
+
+                 const isUserChoice = userAns === currentOpt;
+                 const isCorrectKey = correctAns === currentOpt;
                  
-                 // Logika warna border dan background
-                 let statusClasses = "border-gray-50 bg-gray-50/30"; // Default
-                 if (isCorrectKey) statusClasses = "border-green-500 bg-green-50/50"; // Highlight Kunci
-                 else if (isUserChoice && !isCorrectKey) statusClasses = "border-red-500 bg-red-50/50"; // Highlight Salah
+                 let statusClasses = "border-gray-100 bg-gray-50/20 opacity-60"; 
+                 if (isCorrectKey) statusClasses = "border-green-500 bg-green-50/50 ring-1 ring-green-500 opacity-100"; 
+                 else if (isUserChoice && !isCorrectKey) statusClasses = "border-red-500 bg-red-50/50 opacity-100"; 
 
                  return (
                    <div 
                      key={opt} 
-                     className={`p-4 rounded-xl text-[11px] font-bold border transition-colors ${statusClasses}`}
+                     className={`p-4 rounded-xl text-[11px] font-bold border transition-all ${statusClasses}`}
                    >
                      <div className="flex justify-between items-center gap-4">
                        <div className="flex items-start gap-2">
-                          <span className={`uppercase shrink-0 ${isUserChoice ? 'opacity-100' : 'opacity-30'}`}>{opt}.</span> 
+                          <span className={`uppercase shrink-0 ${isUserChoice || isCorrectKey ? 'opacity-100' : 'opacity-30'}`}>{opt}.</span> 
                           <RenderSoal content={item[`opsi_${opt}`]} />
                        </div>
                        
                        <div className="flex flex-col gap-1 items-end shrink-0">
                          {isCorrectKey && (
-                           <span className="text-[7px] bg-green-500 text-white px-2 py-0.5 rounded font-black uppercase">
-                             Kunci Jawaban
+                           <span className="text-[7px] bg-green-600 text-white px-2 py-1 rounded font-black uppercase shadow-sm">
+                             ✓ Kunci Jawaban
                            </span>
                          )}
                          {isUserChoice && (
-                           <span className={`text-[7px] px-2 py-0.5 rounded font-black uppercase ${isCorrectKey ? 'bg-[#5D4037] text-white' : 'bg-red-500 text-white'}`}>
-                             Jawaban Anda
+                           <span className={`text-[7px] px-2 py-1 rounded font-black uppercase shadow-sm ${isCorrectKey ? 'bg-[#5D4037] text-white' : 'bg-red-600 text-white'}`}>
+                             {isCorrectKey ? "Jawaban Anda (Benar)" : "Jawaban Anda (Salah)"}
                            </span>
                          )}
                        </div>
@@ -203,9 +214,9 @@ export default function PembahasanPage() {
             </div>
 
             <div className="p-5 bg-[#FDFBF9] rounded-2xl border border-[#E6CEA0]/20">
-              <p className="text-[10px] font-black text-[#A67C52] uppercase mb-2">Pembahasan:</p>
+              <p className="text-[10px] font-black text-[#A67C52] uppercase mb-2">Penjelasan Pembahasan:</p>
               <div className="text-xs text-[#5D4037] italic leading-relaxed">
-                <RenderSoal content={item.pembahasan || "Tidak ada pembahasan."} />
+                <RenderSoal content={item.pembahasan || "Tidak ada pembahasan spesifik untuk soal ini."} />
               </div>
             </div>
           </div>
